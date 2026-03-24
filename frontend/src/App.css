@@ -1,0 +1,4 @@
+/* Removed default App.css styles to use index.css variables and modern patterns */
+.app {
+  min-height: 100vh;
+}
