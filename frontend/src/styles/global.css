@@ -1,4 +1,24 @@
-@import './variables.css';
+:root {
+  /* Color Palette - White Dominant with Artisan Accents */
+  --color-white: #ffffff;
+  --color-light-cream: #fdfaf5;
+  --color-deep-brown: #3d2b1f;
+  --color-earthy-brown: #5c4033;
+  --color-spicy-orange: #ff7b00;
+  --color-gold: #c5a059;
+  --color-text-dark: #1a1a1a;
+  --color-text-muted: #666666;
+  
+  /* Backgrounds */
+  --bg-main: var(--color-white);
+  --bg-alt: var(--color-light-cream);
+  --bg-sidebar: var(--color-deep-brown);
+  --bg-card: var(--color-white);
+  
+  /* Transitions & Shadows */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-artisan: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
 
 * {
   margin: 0;
@@ -7,63 +27,44 @@
 }
 
 body {
-  font-family: var(--font-primary);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.5;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background-color: var(--bg-main);
+  color: var(--color-text-dark);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  letter-spacing: -0.02em;
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  transition: var(--transition-fast);
 }
 
 button {
-  cursor: pointer;
-  border: none;
-  background: none;
   font-family: inherit;
-}
-
-ul {
-  list-style: none;
+  cursor: pointer;
 }
 
 .container {
-  max-width: var(--max-width);
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0 var(--spacing-xl);
+  padding: 0 40px;
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 0 var(--spacing-md);
-  }
-}
-
-/* Custom Scrollbar for Premium Feel */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg);
+  background: var(--color-deep-brown);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
+  background: var(--color-warm-brown);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  background: var(--color-spicy-orange);
 }
