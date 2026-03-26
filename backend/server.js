@@ -19,12 +19,12 @@ app.get('/api/health', (req, res) => {
 // --- AUTHENTICATION ROUTES ---
 
 app.post('/api/auth/register', async (req, res) => {
-  const { email, password, phone, address } = req.body;
+  const { name, email, password, phone, address } = req.body;
 
   try {
-    // 1. Sign up user in Supabase Auth
+    // 1. Sign up user in Supabase Auth (Email is still required for Auth)
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
+      email: email || `${phone}@rajasuvai.com`, // Fallback for phone-only signups for now
       password,
     });
 
@@ -35,11 +35,12 @@ app.post('/api/auth/register', async (req, res) => {
       .from('clients')
       .insert([
         { 
-          email, 
-          password_hash: 'managed_by_supabase_auth', // We don't store plain passwords
+          name,
+          email: email || `${phone}@rajasuvai.com`, 
+          password_hash: 'managed_by_supabase_auth',
           phone, 
           address, 
-          role: 'customer' // Default role
+          role: 'customer'
         }
       ]);
 

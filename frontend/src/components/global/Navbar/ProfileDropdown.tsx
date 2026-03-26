@@ -12,6 +12,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
   const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
   
   const [formData, setFormData] = useState({
+    name: '',
     identifier: '', // email or phone
     password: '',
     address: ''
@@ -40,7 +41,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              name: formData.name,
               email: formData.identifier,
+              phone: '',
               password: formData.password,
               address: formData.address
             })
@@ -86,6 +89,18 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
+          <div className="input-group">
+            <label>Full Name</label>
+            <input 
+              type="text" 
+              name="name"
+              placeholder="Your Name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
           <div className="input-group">
             <label>{authMode === 'email' ? 'Email Address' : 'Mobile Number'}</label>
             <input 

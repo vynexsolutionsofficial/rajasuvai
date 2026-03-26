@@ -1,5 +1,5 @@
 .navbar {
-  height: 90px;
+  height: 100px;
   display: flex;
   align-items: center;
   position: absolute;
@@ -8,14 +8,16 @@
   width: 100%;
   background-color: transparent;
   z-index: 1000;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 40px;
 }
 
-.navbar-content {
+.navbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
 .logo-section {
@@ -35,19 +37,14 @@
 }
 
 .brand-name {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-white);
-  line-height: 1;
+  font-size: 1.8rem;
+  letter-spacing: -0.02em;
 }
 
 .brand-tagline {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-brand-orange);
 }
 
 .nav-links {
@@ -99,21 +96,21 @@
   color: var(--color-brand-orange);
 }
 
-.nav-cta-btn {
+.shop-now-btn {
   background-color: var(--color-brand-orange);
   color: var(--color-white);
-  padding: 10px 24px;
+  padding: 12px 28px;
   border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: var(--transition-base);
+  transition: all 0.3s ease;
+  border: none;
 }
 
-.nav-cta-btn:hover {
-  background-color: #ff9d2e;
-  transform: translateY(-2px);
+.shop-now-btn:hover {
+  background-color: #ff8c00;
+  transform: scale(1.05);
 }
 
 @media (max-width: 1024px) {
