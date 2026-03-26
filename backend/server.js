@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+import products from './data/products.js';
+
 dotenv.config();
 
 const app = express();
@@ -12,6 +14,10 @@ app.use(express.json());
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Rajasuvai Backend is running' });
+});
+
+app.get('/api/products', (req, res) => {
+  res.json(products);
 });
 
 app.listen(PORT, () => {

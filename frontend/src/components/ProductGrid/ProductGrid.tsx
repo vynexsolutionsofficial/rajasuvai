@@ -1,15 +1,40 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ProductCard from '../ProductCard/ProductCard';
 import './ProductGrid.css';
 
-const DUMMY_PRODUCTS = [
-  { id: 1, name: 'Royal Mysore Pak', price: '₹850', category: 'Sweets', image: 'https://images.unsplash.com/photo-1589119908995-c6837fa14848?w=800&auto=format&fit=crop' },
-  { id: 2, name: 'Premium Karupatti Halwa', price: '₹720', category: 'Sweets', image: 'https://images.unsplash.com/photo-1601050638917-3f80fc014dad?w=800&auto=format&fit=crop' },
-  { id: 3, name: 'Madras Filter Coffee Blend', price: '₹450', category: 'Beverages', image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop' },
-  { id: 4, name: 'Handcrafted Murukku', price: '₹350', category: 'Snacks', image: 'https://images.unsplash.com/photo-1626132646529-500639d48530?w=800&auto=format&fit=crop' },
-];
+interface Product {
+  id: number;
+  name: string;
+  price: string;
+  category: string;
+  image: string;
+}
 
 const ProductGrid: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        if (!response.ok) throw new Error('Failed to fetch products');
+        const data = await response.json();
+        setProducts(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) return <div className="loading container">Loading Collection...</div>;
+  if (error) return <div className="error container">{error}</div>;
+
   return (
     <section className="product-grid-section container">
       <div className="section-header">
@@ -17,7 +42,7 @@ const ProductGrid: React.FC = () => {
         <a href="/shop" className="view-all">View All Products</a>
       </div>
       <div className="product-grid">
-        {DUMMY_PRODUCTS.map(product => (
+        {products.map(product => (
           <ProductCard key={product.id} {...product} />
         ))}
       </div>
