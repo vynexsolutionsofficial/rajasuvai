@@ -1,0 +1,120 @@
+.hero {
+  height: calc(100vh - var(--header-height));
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-bg-alt);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 100%);
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  filter: brightness(0.7);
+}
+
+.hero-content {
+  color: var(--color-white);
+  z-index: 1;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1.1;
+  margin-bottom: var(--spacing-lg);
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin-bottom: var(--spacing-2xl);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-cta {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.btn {
+  padding: var(--spacing-md) var(--spacing-2xl);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: var(--transition-base);
+}
+
+.btn-primary {
+  background-color: var(--color-white);
+  color: var(--color-accent);
+}
+
+.btn-primary:hover {
+  background-color: transparent;
+  color: var(--color-white);
+  box-shadow: 0 0 0 1px var(--color-white) inset;
+}
+
+.btn-secondary {
+  color: var(--color-white);
+  box-shadow: 0 0 0 1px var(--color-white) inset;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-white);
+  color: var(--color-accent);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-up {
+  animation: fadeInUp 1s ease forwards;
+}
+
+.animate-up-delayed {
+  opacity: 0;
+  animation: fadeInUp 1s ease 0.3s forwards;
+}
+
+.animate-up-delayed-more {
+  opacity: 0;
+  animation: fadeInUp 1s ease 0.6s forwards;
+}
+
+@media (max-width: 768px) {
+  .hero-overlay {
+    background: rgba(0,0,0,0.6);
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .hero-cta {
+    justify-content: center;
+  }
+}

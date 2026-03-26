@@ -1,0 +1,31 @@
+.ad-banner {
+  background-color: var(--color-bg-alt);
+  padding: var(--spacing-lg) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ad-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ad-content span {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.ad-content h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .ad-content {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+}

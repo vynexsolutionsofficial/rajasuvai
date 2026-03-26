@@ -1,0 +1,16 @@
+.featured-section {
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  background-color: var(--color-bg-alt);
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-2xl);
+}
+
+@media (max-width: 768px) {
+  .featured-grid {
+    grid-template-columns: 1fr;
+  }
+}
