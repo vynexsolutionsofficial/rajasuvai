@@ -1,67 +1,66 @@
 .product-card {
-  transition: var(--transition-base);
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+  border: 1px solid #f0f0f0;
   cursor: pointer;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 .product-image-wrapper {
   position: relative;
-  aspect-ratio: 1 / 1.2;
-  overflow: hidden;
-  background-color: var(--color-bg-alt);
-  margin-bottom: var(--spacing-md);
+  height: 200px;
+  background: #f9f9f9;
 }
 
 .product-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: var(--transition-base);
-}
-
-.add-to-cart-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: var(--spacing-md);
-  background-color: var(--color-accent);
-  color: var(--color-white);
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
-  transform: translateY(100%);
-  transition: var(--transition-base);
+  object-fit: contain;
+  padding: 15px;
+  transition: transform 0.3s ease;
 }
 
 .product-card:hover .product-image {
   transform: scale(1.05);
 }
 
-.product-card:hover .add-to-cart-overlay {
-  transform: translateY(0);
+.product-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: white;
+  z-index: 2;
+  text-transform: uppercase;
 }
+
+.product-badge.new { background: #27ae60; }
+.product-badge.hot { background: #e74c3c; }
+.product-badge.sale { background: #e67e22; }
 
 .product-info {
-  text-align: left;
-}
-
-.product-category {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
-  margin-bottom: var(--spacing-xs);
-  display: block;
+  padding: 20px;
 }
 
 .product-name {
-  font-size: 1.1rem;
-  margin-bottom: var(--spacing-xs);
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
 }
 
 .product-price {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1a1a1a;
 }

@@ -11,7 +11,11 @@ interface Product {
   image: string;
 }
 
-const ProductGrid: React.FC = () => {
+interface ProductGridProps {
+  category?: string;
+}
+
+const ProductGrid: React.FC<ProductGridProps> = ({ category }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +24,13 @@ const ProductGrid: React.FC = () => {
     // Initial fetch from Supabase
     const fetchProducts = async () => {
       try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*');
+        let query = supabase.from('products').select('*');
+        
+        if (category && category !== 'All') {
+          query = query.eq('category', category);
+        }
+
+        const { data, error } = await query;
         
         if (error) throw error;
         setProducts(data || []);
@@ -52,7 +60,7 @@ const ProductGrid: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [category]);
 
   if (loading) return <div className="loading container">Loading Collection...</div>;
   if (error) return <div className="error container">{error}</div>;
