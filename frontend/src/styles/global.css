@@ -5,6 +5,7 @@
   --color-deep-brown: #3d2b1f;
   --color-earthy-brown: #5c4033;
   --color-spicy-orange: #ff7b00;
+  --color-brand-orange: var(--color-spicy-orange);
   --color-gold: #c5a059;
   --color-text-dark: #1a1a1a;
   --color-text-muted: #666666;
@@ -68,3 +69,20 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-spicy-orange);
 }
+.site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.site-header.scrolled {
+  position: fixed;
+  background: linear-gradient(135deg, #8B5A2B 0%, #D97706 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+

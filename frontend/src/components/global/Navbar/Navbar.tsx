@@ -1,57 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Search, Heart } from 'lucide-react';
+import { ShoppingCart, Search, User } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
+import AuthModal from '../Auth/AuthModal';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const { cartCount } = useCart();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* Logo Section */}
+        {/* Left: Logo Section */}
         <Link to="/" className="navbar-logo">
-          <div className="logo-emblem"></div>
-          <div className="logo-text">
-            <span className="logo-raja">Raja</span>
-            <span className="logo-suvai">Suvai</span>
+          <div className="logo-content">
+            <div className="logo-main">
+              <div className="logo-emblem"></div>
+              <span className="logo-text">Rajasuvai..</span>
+            </div>
+            <span className="logo-subtext">ARTISAN SPICES</span>
           </div>
         </Link>
 
-        {/* Search Bar - Center */}
-        <div className="navbar-search">
-          <div className="search-input-wrapper">
-            <input type="text" placeholder="Search for products..." />
-            <button className="search-submit">
-              <Search size={18} />
-            </button>
+        {/* Center: Navigation & Subtext */}
+        <div className="navbar-center">
+          <div className="nav-links">
+            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>HOME</Link>
+            <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>SHOP SPICES</Link>
+            <Link to="/story" className={location.pathname === '/story' ? 'active' : ''}>OUR STORY</Link>
+            <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>CONTACT</Link>
+          </div>
+          <div className="nav-subtext">
+            <span>P U R E   O R G A N I C   S P I C E S</span>
           </div>
         </div>
 
-        {/* Icons Section */}
+        {/* Right: Icons & Shop Now */}
         <div className="navbar-right">
           <button className="navbar-icon-btn">
-            <User size={24} />
+            <Search size={22} />
           </button>
           
-          <button className="navbar-icon-btn">
-            <Heart size={24} />
-            <span className="badge-red">1</span>
+          <button 
+            className={`navbar-icon-btn profile-btn ${showAuthModal ? 'active' : ''}`}
+            onClick={() => setShowAuthModal(!showAuthModal)}
+          >
+            <User size={22} />
           </button>
 
-          <button className="navbar-icon-btn">
-            <ShoppingCart size={24} />
-            <span className="badge-red">3</span>
-          </button>
+          <Link to="/cart" className="navbar-icon-btn cart-btn">
+            <ShoppingCart size={22} />
+            {cartCount > 0 && <span className="cat-badge">{cartCount}</span>}
+          </Link>
 
-          <button className="navbar-icon-btn">
-            <ShoppingCart size={24} />
-            <span className="badge-red">{cartCount > 0 ? cartCount : 2}</span>
-          </button>
+          <Link to="/shop" className="shop-now-btn">
+            SHOP NOW
+          </Link>
         </div>
       </div>
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </nav>
   );
 };
