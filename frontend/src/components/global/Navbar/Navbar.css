@@ -1,133 +1,198 @@
 .navbar {
-  height: 90px;
-  background: #ffffff;
+  height: 100px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 100%);
   display: flex;
   align-items: center;
-  position: fixed;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 120px);
-  max-width: 1540px;
+  position: relative;
+  width: 100%;
   z-index: 1000;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-  padding: 0 40px;
+  padding: 0 60px;
+  border-bottom: none;
+  transition: all 0.4s ease;
 }
+
+.site-header.scrolled .navbar {
+  background: transparent;
+  height: 80px; /* Slimmer header on scroll */
+}
+
+/* Bokeh effect simulation - Removing for true transparency */
+/*.navbar::before { ... }*/
 
 .navbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 /* Logo Section */
 .navbar-logo {
+  text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 10px;
-  text-decoration: none;
+}
+
+.logo-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .logo-emblem {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: #ff7b00;
-  mask: radial-gradient(circle, black, transparent);
-  /* Emblem placeholder */
-  background: radial-gradient(circle, #ff7b00 0%, #d4af37 100%);
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  /* Simple flame/bulb shape */
+  clip-path: path('M12 2C12 2 4 10 4 15C4 19.4183 7.58172 23 12 23C16.4183 23 20 19.4183 20 15C20 10 12 2 12 2Z');
+  position: relative;
+}
+
+.logo-emblem::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0.6;
 }
 
 .logo-text {
   font-family: 'Poppins', sans-serif;
-  font-size: 1.6rem;
-  font-weight: 800;
-  line-height: 1;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
 }
 
-.logo-raja { color: #1a1a1a; }
-.logo-suvai { color: #ff7b00; }
-
-/* Search Section */
-.navbar-search {
-  flex: 0 1 500px;
-  margin: 0 40px;
+.logo-subtext {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 4px;
+  font-weight: 500;
+  margin-top: -5px;
+  text-align: center;
 }
 
-.search-input-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.search-input-wrapper input {
-  width: 100%;
-  background: #fdfdfd;
-  border: 1px solid #eeeeee;
-  border-radius: 50px;
-  padding: 12px 25px;
-  padding-right: 50px;
-  font-size: 0.95rem;
-  color: #333;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.search-input-wrapper input:focus {
-  border-color: #ff7b00;
-  box-shadow: 0 0 0 4px rgba(255,123,0,0.05);
-}
-
-.search-submit {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: #888;
-  cursor: pointer;
+/* Center Section */
+.navbar-center {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 8px;
 }
 
-/* Icons Section */
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #ff7b00;
+}
+
+.nav-subtext {
+  font-size: 0.7rem;
+  color: #fff;
+  letter-spacing: 8px;
+  font-weight: 700;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+/* Right Section */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 30px;
 }
 
 .navbar-icon-btn {
   background: transparent;
   border: none;
-  color: #1a1a1a;
+  color: #fff;
   cursor: pointer;
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
+  transition: opacity 0.3s;
+  position: relative;
 }
 
 .navbar-icon-btn:hover {
-  color: #ff7b00;
+  opacity: 0.8;
 }
 
-.badge-red {
+.cat-badge {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #e74c3c;
-  color: white;
+  background: #ff7b00;
+  color: #fff;
   font-size: 0.65rem;
-  font-weight: 800;
-  width: 16px;
-  height: 16px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #ffffff;
 }
+
+.shop-now-btn {
+  background: #e67e22;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+}
+
+.shop-now-btn:hover {
+  background: #d35400;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+}
+
+@media (max-width: 1200px) {
+  .navbar {
+    padding: 0 30px;
+  }
+  .nav-links {
+    gap: 20px;
+  }
+  .nav-subtext {
+    letter-spacing: 4px;
+  }
+}
+
+@media (max-width: 992px) {
+  .navbar-center {
+    display: none;
+  }
+}
+
