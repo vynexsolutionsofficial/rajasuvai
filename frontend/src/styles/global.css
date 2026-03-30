@@ -1,24 +1,39 @@
 :root {
-  /* Color Palette - White Dominant with Artisan Accents */
+  /* Color Palette - Strict Orange & White */
   --color-white: #ffffff;
-  --color-light-cream: #fdfaf5;
-  --color-deep-brown: #3d2b1f;
-  --color-earthy-brown: #5c4033;
+  --color-off-white: #fafafa;
   --color-spicy-orange: #ff7b00;
   --color-brand-orange: var(--color-spicy-orange);
-  --color-gold: #c5a059;
+  --color-deep-orange: #e66a00;
   --color-text-dark: #1a1a1a;
   --color-text-muted: #666666;
   
   /* Backgrounds */
   --bg-main: var(--color-white);
-  --bg-alt: var(--color-light-cream);
-  --bg-sidebar: var(--color-deep-brown);
+  --bg-alt: var(--color-off-white);
   --bg-card: var(--color-white);
   
   /* Transitions & Shadows */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-artisan: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-artisan: 0 4px 20px rgba(255, 123, 0, 0.15);
+
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 5rem;
+
+  /* Typography Scale */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-md: 1rem;
+  --font-lg: 1.25rem;
+  --font-xl: 1.5rem;
+  --font-2xl: 2rem;
+  --font-3xl: 3rem;
 }
 
 * {
@@ -31,7 +46,7 @@ body {
   font-family: 'Outfit', 'Inter', sans-serif;
   background-color: var(--bg-main);
   color: var(--color-text-dark);
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -47,9 +62,9 @@ button {
 
 .container {
   width: 100%;
-  max-width: 1440px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 var(--spacing-xl);
 }
 
 /* Scrollbar Styling */
@@ -82,7 +97,7 @@ button {
 
 .site-header.scrolled {
   position: fixed;
-  background: linear-gradient(135deg, #8B5A2B 0%, #D97706 100%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: var(--color-spicy-orange);
+  box-shadow: 0 4px 20px rgba(255, 123, 0, 0.2);
 }
 

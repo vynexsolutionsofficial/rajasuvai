@@ -1,111 +1,109 @@
+/* ============================================
+   SHOP PAGE — Premium Artisan Design
+   ============================================ */
+
 .shop-page {
-  padding-top: 130px;
-  background: #fcf9f4; /* Cream artisan background */
+  padding-top: 110px; /* clear transparent header */
+  background: #f8f5f0;
   min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
 }
 
+/* ── Layout ── */
 .shop-container {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 0;
-  max-width: 1540px;
+  grid-template-columns: 260px 1fr;
+  gap: 2rem;
+  padding: 2rem 2.5rem;
+  max-width: 1300px;
   margin: 0 auto;
+  align-items: start;
 }
 
-/* Sidebar Styles - White Box */
+/* ── Sidebar ── */
 .shop-sidebar {
-  background: #ffffff; 
-  padding: 40px;
-  color: #1a1a1a;
-  width: 320px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.8rem 1.5rem;
   position: sticky;
-  top: 130px; 
-  height: calc(100vh - 160px);
-  overflow-y: auto;
-  border: 1px solid #eeeeee;
-  border-radius: 8px;
-  margin: 0 0 20px 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+  top: 110px;
+  height: fit-content;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border: 1px solid #ede8e0;
 }
 
-.shop-sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-.shop-sidebar::-webkit-scrollbar-thumb {
-  background: #eeeeee;
-  border-radius: 10px;
-}
+.shop-sidebar::-webkit-scrollbar { width: 4px; }
+.shop-sidebar::-webkit-scrollbar-thumb { background: #e5ddd5; border-radius: 4px; }
 
 .shop-filter-group {
-  margin-bottom: 35px;
-  border-bottom: 1px solid #f9f9f9;
-  padding-bottom: 25px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f2ede8;
+}
+
+.shop-filter-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .shop-filter-title {
-  font-size: 1rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: #1a1a1a;
-  text-transform: capitalize;
-  letter-spacing: -0.01em;
-  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
 }
 
 .shop-filter-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 0.75rem;
 }
 
 .shop-filter-item {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 0.75rem;
   cursor: pointer;
-  font-size: 0.95rem;
-  color: #444;
-  transition: all 0.2s;
+  font-size: 0.88rem;
+  color: #555;
+  transition: color 0.2s;
 }
 
-.shop-filter-item:hover {
-  color: #ff7b00;
-}
+.shop-filter-item:hover { color: #ff7b00; }
+.shop-filter-item input { display: none; }
 
-.shop-filter-item input {
-  display: none;
-}
-
-/* Categories use orange dots in reference */
 .shop-radio-custom {
-  width: 10px;
-  height: 10px;
-  border: 1px solid #ccc;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #d0c8be;
   border-radius: 50%;
   display: inline-block;
-  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s;
 }
 
 .shop-filter-item input:checked + .shop-radio-custom {
   background: #ff7b00;
   border-color: #ff7b00;
-  box-shadow: 0 0 0 3px rgba(255, 123, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(255,123,0,0.15);
 }
 
-/* Checkboxes for price */
 .shop-check-custom {
-  width: 16px;
-  height: 16px;
-  border: 1px solid #ccc;
-  border-radius: 50%; /* Image shows circles for price too */
+  width: 14px;
+  height: 14px;
+  border: 2px solid #d0c8be;
+  border-radius: 3px;
   display: inline-block;
+  flex-shrink: 0;
   position: relative;
+  transition: all 0.2s;
 }
 
 .shop-filter-item input:checked + .shop-check-custom {
-  background: #ffffff;
-  border-color: #333;
+  background: #ff7b00;
+  border-color: #ff7b00;
 }
 
 .shop-filter-item input:checked + .shop-check-custom::after {
@@ -114,89 +112,115 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 10px;
-  color: #333;
+  font-size: 9px;
+  color: #fff;
+  font-weight: 900;
 }
 
-/* Star Ratings in sidebar */
 .shop-star-rating {
   color: #ffb400;
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  align-items: center;
 }
 
-/* Main Content Area */
+/* ── Main Content ── */
 .shop-main {
-  padding: 0 60px 40px 60px;
+  min-width: 0; /* prevent overflow */
 }
 
 .shop-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 35px;
-  padding-bottom: 10px;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ede8e0;
 }
 
+.shop-header-info {}
+
 .shop-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #333;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #1a1a1a;
   margin: 0;
+  letter-spacing: -0.5px;
 }
 
 .item-stats {
-  font-size: 0.9rem;
-  color: #888;
-  margin-top: 10px;
+  font-size: 0.82rem;
+  color: #999;
+  margin-top: 0.25rem;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 0.75rem;
 }
 
 .shop-sort {
-  padding: 8px 15px;
-  border: 1px solid #eeeeee;
-  border-radius: 4px;
-  background: #ffffff;
-  font-size: 0.9rem;
-  color: #333;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #e0d8d0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.85rem;
+  color: #444;
+  outline: none;
+  cursor: pointer;
 }
 
 .filter-btn-orange {
   background: #ff7b00;
-  color: white;
+  color: #fff;
   border: none;
-  padding: 8px 25px;
-  border-radius: 4px;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
   font-weight: 700;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+.filter-btn-orange:hover { background: #e66a00; }
+
+/* ── Pagination ── */
 .shop-pagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 60px;
+  gap: 0.5rem;
+  margin-top: 3rem;
+  padding-bottom: 2rem;
 }
 
 .page-btn {
-  background: white;
-  border: 1px solid #eeeeee;
-  padding: 8px 15px;
+  background: #fff;
+  border: 1px solid #e0d8d0;
+  padding: 0.5rem 1rem;
   font-weight: 700;
-  color: #1a1a1a;
-  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.page-btn.active {
-  background: #ff7b00;
-  color: white;
+.page-btn:hover { border-color: #ff7b00; color: #ff7b00; }
+.page-btn.active { background: #ff7b00; color: #fff; border-color: #ff7b00; }
+.page-btn.next { padding: 0.5rem 1.4rem; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .shop-container {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
+  .shop-sidebar {
+    position: static;
+  }
 }

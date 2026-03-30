@@ -10,8 +10,8 @@ const client = new Client({
   },
   puppeteer: {
     headless: true,
-    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    args: ['--no-sandbox']
+    // executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Often causes crashes if path is invalid
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
 
@@ -40,7 +40,10 @@ client.on('auth_failure', (msg) => {
   console.error('WHATSAPP AUTH FAILURE:', msg);
 });
 
-client.initialize();
+client.initialize().catch(err => {
+  console.error('[WA-BOT] Failed to initialize WhatsApp client. The server will continue without WhatsApp support.');
+  console.error('[WA-BOT] Error details:', err.message);
+});
 
 /**
  * Send OTP via WhatsApp
