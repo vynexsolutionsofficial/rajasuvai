@@ -30,10 +30,12 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ onClose }) => {
 
     try {
       if (authMode === 'email') {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        // We only need the error for checking if registration is required
+        const { error } = await supabase.auth.signInWithPassword({
           email: formData.identifier,
           password: formData.password,
         });
+
 
         if (error) {
           // If login fails, try registration via our backend

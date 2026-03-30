@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import heroBg from '../../assets/hero-bg-v2.png';
 import './Hero.css';
 
@@ -9,12 +10,11 @@ const Hero: React.FC = () => {
         <img src={heroBg} alt="Premium Rajasuvai Background" className="hero-bg" />
         <div className="hero-content container">
           <div className="hero-text-center">
+            <div className="hero-badge">PURE ORGANIC SPICES</div>
             <h1 className="hero-title">
-              EXPERIENCE THE QUALITY OF <br />
-              <span 
-                className="text-mask" 
-                style={{ backgroundImage: `url(${heroBg})` }}
-              >
+              EXPERIENCE THE <br />
+              <div className="title-bold">QUALITY OF</div>
+              <span className="text-mask">
                 every single grain.
               </span>
             </h1>
@@ -23,12 +23,11 @@ const Hero: React.FC = () => {
             </p>
             
             <div className="hero-cta">
-              <a href="/shop" className="btn btn-orange">START SHOPPING</a>
-              <a href="/our-story" className="btn btn-outline">
-                OUR STORY <span>→</span>
-              </a>
+              <Link to="/shop" className="btn btn-orange-solid">START SHOPPING</Link>
+              <Link to="/story" className="btn btn-outline-white">
+                OUR STORY <span className="arrow">→</span>
+              </Link>
             </div>
-
 
           </div>
         </div>

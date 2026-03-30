@@ -19,17 +19,12 @@ const Navbar: React.FC = () => {
           <img src={logo} alt="Rajasuvai Logo" className="logo-image" />
         </Link>
 
-        {/* Center: Navigation & Subtext */}
-        <div className="navbar-center">
-          <div className="nav-links">
-            <Link to="/" className={location.pathname === '/' ? 'active' : ''}>HOME</Link>
-            <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>SHOP SPICES</Link>
-            <Link to="/story" className={location.pathname === '/story' ? 'active' : ''}>OUR STORY</Link>
-            <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>CONTACT</Link>
-          </div>
-          <div className="nav-subtext">
-            <span>P U R E   O R G A N I C   S P I C E S</span>
-          </div>
+        {/* Center: Navigation */}
+        <div className="nav-links">
+          <Link to="/" className={location.pathname === '/' ? 'active' : ''}>HOME</Link>
+          <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>SHOP SPICES</Link>
+          <Link to="/story" className={location.pathname === '/story' ? 'active' : ''}>OUR STORY</Link>
+          <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>CONTACT</Link>
         </div>
 
         {/* Right: Icons & Shop Now */}

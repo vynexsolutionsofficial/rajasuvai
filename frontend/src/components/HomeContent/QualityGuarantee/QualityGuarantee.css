@@ -1,0 +1,98 @@
+.quality-section {
+  padding: 5rem 0;
+  text-align: center;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.quality-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 4rem;
+}
+
+.quality-accent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #ff7b00; /* Orange */
+  text-transform: uppercase;
+}
+
+.quality-icon {
+  font-size: 1rem;
+}
+
+.quality-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #1a1a1a;
+  text-transform: capitalize;
+}
+
+.title-orange {
+  color: #ff7b00; /* Orange */
+}
+
+/* Benefits Grid */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.benefit-item {
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.benefit-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 30px rgba(255, 123, 0, 0.1);
+  border-color: #ff7b00;
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.benefit-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.benefit-desc {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .quality-title {
+    font-size: 2.5rem;
+  }
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ChevronRight } from 'lucide-react';
-import { supabase } from '../../../supabaseClient';
+// import { supabase } from '../../../supabaseClient'; // Removed due to mock
 import './AuthModal.css';
 
 interface AuthModalProps {
@@ -27,18 +27,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setLoading(true);
     setMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
+      // MOCK OAUTH CALL TO PREVENT 500 ERROR WITH PLACEHOLDERS
+      // const { error } = await supabase.auth.signInWithOAuth({
+      //   provider: 'google',
+      //   options: {
+      //     redirectTo: window.location.origin
+      //   }
+      // });
+      
+      const error = new Error("Google Login is disabled (Mock Environment)");
       if (error) throw error;
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Google Login failed' });
       setLoading(false);
     }
   };
+
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();

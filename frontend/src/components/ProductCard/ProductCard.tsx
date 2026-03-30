@@ -1,4 +1,7 @@
+import React from 'react';
 import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import './ProductCard.css';
 
 interface ProductCardProps {
   id: number;
@@ -10,67 +13,49 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = (product) => {
   const { addToCart } = useCart();
-  const { name, price, image, category } = product;
-  
-  // Logic based on screenshot
+  const navigate = useNavigate();
+  const { id, name, price, image, category } = product;
+
+  // Modern Badge Logic
   let badge = null;
-  if (name.includes('Turmeric') || name.includes('Coconut')) badge = 'NEW';
-  else if (name.includes('Chilli')) badge = 'HOT';
+  if (name.includes('Turmeric') || name.includes('Coconut')) badge = 'NEW ARRIVAL';
+  else if (name.includes('Chilli')) badge = 'LIMITED';
   else if (name.includes('Cashews')) badge = 'SALE';
   else if (name.includes('Candy')) badge = 'BEST SELLER';
 
-  const rating = name.includes('Garam') ? 4 : 0;
+  const numPrice = parseFloat(price.replace(/[^0-9.]/g, ''));
+  const originalPrice = Math.round(numPrice * 1.2); // 20% markup for "original" price
 
   return (
-    <div className="product-card">
-      <div className="product-image-wrapper">
-        {badge && (
-          <span className={`product-badge ${badge.toLowerCase().split(' ')[0]}`}>
-            {badge}
-          </span>
-        )}
-        <img src={image} alt={name} className="product-image" />
-        <button 
-          className="add-to-cart-simple"
-          onClick={(e) => {
-            e.stopPropagation();
-            addToCart(product);
-          }}
-        >
-          Add to Cart
-        </button>
+    <div className="product-card-vogue" onClick={() => navigate(`/product/${id}`)}>
+      <div className="product-card-media">
+        {badge && <span className="product-card-badge">{badge}</span>}
+        <img src={image} alt={name} className="product-card-image" />
+        <div className="product-card-overlay">
+          <button 
+            className="product-card-cta"
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(product);
+            }}
+          >
+            QUICK ADD +
+          </button>
+        </div>
       </div>
-      <div className="product-info">
-        <h3 className="product-name">{name}</h3>
-        {rating > 0 && (
-          <div className="product-rating">
-            {Array(5).fill(0).map((_, i) => (
-              <span key={i} style={{ color: i < rating ? '#ffb400' : '#ddd' }}>★</span>
-            ))}
-          </div>
-        )}
-        <p className="product-price">₹ {price.replace(/[^0-9.]/g, '')}</p>
-        
-        <div className="product-actions-fixed">
-          <button 
-            className="btn-add-cart"
-            onClick={(e) => {
-              e.stopPropagation();
-              addToCart(product);
-            }}
-          >
-            Add to Kart
-          </button>
-          <button 
-            className="btn-buy-now"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle buy now logic (e.g., add to cart and redirect to checkout)
-              addToCart(product);
-            }}
-          >
-            Buy
-          </button>
+      
+      <div className="product-card-details">
+        <span className="product-card-category">{category}</span>
+        <h3 className="product-card-name">{name}</h3>
+        <div className="product-card-price-row">
+          <span className="product-card-price-current">₹{numPrice}</span>
+          <span className="product-card-price-old">₹{originalPrice}</span>
+        </div>
+        <div className="product-card-rating">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <span key={s} className="product-card-star">★</span>
+          ))}
+          <span className="product-card-review-count">(48)</span>
         </div>
       </div>
     </div>

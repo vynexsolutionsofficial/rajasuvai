@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
+import { useNavigate } from 'react-router-dom';
 import './ShopProductCard.css';
 
 interface ProductCardProps {
@@ -11,8 +12,9 @@ interface ProductCardProps {
 }
 
 const ShopProductCard: React.FC<ProductCardProps> = (product) => {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { name, price, image } = product;
+  const { id, name, price, image } = product;
   
   // High-fidelity image mapping for trial
   const getProductImage = (img: string, productName: string) => {
@@ -40,7 +42,11 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
   const rating = name.includes('Garam') ? 4 : 0;
 
   return (
-    <div className="shop-product-card" onClick={() => addToCart(product)}>
+    <div 
+      className="shop-product-card" 
+      onClick={() => navigate(`/product/${id}`)}
+      style={{ cursor: 'pointer' }}
+    >
       <div className="shop-product-image-container">
         {badge && <span className={`shop-badge badge-${badge.toLowerCase().replace(' ', '-')}`}>{badge}</span>}
         <img src={getProductImage(image, name)} alt={name} className="shop-product-image" />
@@ -56,6 +62,30 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
           </div>
         )}
         <p className="shop-product-price">₹{price.replace(/[^0-9.]/g, '')}</p>
+        
+        <div className="shop-product-actions" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+          <button 
+            className="btn-add-cart" 
+            style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #2d3e50', borderRadius: '20px', color: '#2d3e50', cursor: 'pointer', fontWeight: 600 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(product);
+            }}
+          >
+            Add to Cart
+          </button>
+          <button 
+            className="btn-buy-now"
+            style={{ flex: 1, padding: '8px', background: '#2d3e50', border: 'none', borderRadius: '20px', color: 'white', cursor: 'pointer', fontWeight: 600 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(product);
+              navigate('/cart');
+            }}
+          >
+            Buy
+          </button>
+        </div>
       </div>
     </div>
   );

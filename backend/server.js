@@ -2,10 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { supabase } from './supabaseClient.js';
-import { 
-  sendLoginEmail, 
-  sendOrderEmail, 
-  sendOrderStatusEmail 
+import {
+  sendLoginEmail,
+  sendOrderEmail,
+  sendOrderStatusEmail
 } from './emailService.js';
 import { sendWhatsAppOTP } from './whatsappService.js';
 
@@ -27,7 +27,7 @@ const otpStore = new Map(); // Mock OTP store: phone -> otp
 
 app.post('/api/auth/send-otp', async (req, res) => {
   const { phone, mode } = req.body; // mode: 'login' or 'signup'
-  
+
   try {
     // 1. Database Check based on Mode
     const { data: user, error: checkError } = await supabase
@@ -50,13 +50,13 @@ app.post('/api/auth/send-otp', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore.set(phone, otp);
     console.log(`[MOCK OTP] Generated for ${phone} (${mode}): ${otp}`);
-    
+
     // 3. Send via WhatsApp
     const waResult = await sendWhatsAppOTP(phone, otp);
-    
-    res.json({ 
-      success: true, 
-      message: waResult.success ? 'OTP sent via WhatsApp' : 'OTP generated (Check terminal for mock)' 
+
+    res.json({
+      success: true,
+      message: waResult.success ? 'OTP sent via WhatsApp' : 'OTP generated (Check terminal for mock)'
     });
   } catch (error) {
     console.error('OTP Error:', error);
@@ -85,7 +85,7 @@ app.get('/api/auth/check-phone/:phone', async (req, res) => {
       .eq('phone', phone)
       .single();
 
-    if (error && error.code !== 'PGRST116') throw error; 
+    if (error && error.code !== 'PGRST116') throw error;
 
     res.json({ exists: !!data, user: data || null });
   } catch (error) {
@@ -105,8 +105,8 @@ app.post('/api/auth/register', async (req, res) => {
       .single();
 
     if (existingUser) {
-      return res.status(400).json({ 
-        message: existingUser.phone === phone ? 'Mobile number already registered' : 'Email already registered' 
+      return res.status(400).json({
+        message: existingUser.phone === phone ? 'Mobile number already registered' : 'Email already registered'
       });
     }
 
@@ -122,12 +122,12 @@ app.post('/api/auth/register', async (req, res) => {
     const { error: clientError } = await supabase
       .from('clients')
       .insert([
-        { 
+        {
           name,
           email,
           password_hash: 'managed_by_supabase_auth',
-          phone, 
-          address, 
+          phone,
+          address,
           role: 'customer'
         }
       ]);
@@ -152,10 +152,10 @@ app.post('/api/auth/login', async (req, res) => {
 
     if (error) throw error;
 
-    res.json({ 
-      message: 'Login successful', 
+    res.json({
+      message: 'Login successful',
       token: data.session.access_token,
-      user: data.user 
+      user: data.user
     });
   } catch (error) {
     res.status(401).json({ error: error.message });
@@ -168,11 +168,11 @@ app.get('/api/products', async (req, res) => {
   const { data, error } = await supabase
     .from('products')
     .select('*');
-  
+
   if (error) {
     return res.status(500).json({ error: error.message });
   }
-  
+
   res.json(data);
 });
 
@@ -185,7 +185,7 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
     // Basic stats example: count products and total sales
     const { count: productCount } = await supabase.from('products').select('*', { count: 'exact', head: true });
     const { data: salesData } = await supabase.from('sales').select('total_amount');
-    
+
     const totalSales = salesData?.reduce((sum, s) => sum + Number(s.total_amount), 0) || 0;
 
     res.json({
@@ -228,7 +228,7 @@ app.post('/api/orders', async (req, res) => {
         .select('name, price')
         .eq('id', item.product_id)
         .single();
-      
+
       if (prodErr || !product) throw new Error(`Product ${item.product_id} not found`);
 
       // Get Inventory
@@ -244,17 +244,17 @@ app.post('/api/orders', async (req, res) => {
       // Clean price string (e.g., "₹450" -> 450)
       const numericPrice = parseFloat(product.price.replace(/[^\d.]/g, ''));
       totalPrice += numericPrice * item.quantity;
-      
+
       updates.push({ product_id: item.product_id, newQuantity: inv.quantity - item.quantity });
     }
 
     // 3. Create Order
     const { data: order, error: orderErr } = await supabase
       .from('orders')
-      .insert([{ 
-        client_id: client.id, 
-        status: 'ordered', 
-        total_price: totalPrice 
+      .insert([{
+        client_id: client.id,
+        status: 'ordered',
+        total_price: totalPrice
       }])
       .select()
       .single();
@@ -284,10 +284,10 @@ app.post('/api/orders', async (req, res) => {
       await sendOrderEmail(client.email, client.name, order.id, totalPrice);
     }
 
-    res.status(201).json({ 
-      message: 'Order placed successfully!', 
-      orderId: order.id, 
-      total: totalPrice 
+    res.status(201).json({
+      message: 'Order placed successfully!',
+      orderId: order.id,
+      total: totalPrice
     });
 
   } catch (error) {
@@ -319,7 +319,7 @@ app.post('/api/admin/orders/:id/status', async (req, res) => {
       .select('name, email')
       .eq('id', order.client_id)
       .single();
- 
+
     if (!clientErr && client && client.email) {
       await sendOrderStatusEmail(client.email, client.name, order.id, status);
     }

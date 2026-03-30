@@ -1,11 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import ShopProductGrid from './ShopProductGrid';
 import './Shop.css';
 
 const Shop: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const itemsPerPage = 12;
 
   const categories = ['All', 'Spices', 'Masalas', 'Oils', 'Snacks'];
+
+  const handleCategoryChange = (cat: string) => {
+    setActiveCategory(cat);
+    setCurrentPage(1); // Reset to page 1 on category change
+  };
+
+  const handleTotalItems = useCallback((total: number) => {
+    setTotalItems(total);
+  }, []);
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
 
   return (
     <div className="shop-page">
@@ -20,7 +37,7 @@ const Shop: React.FC = () => {
                     type="radio"
                     name="category"
                     checked={activeCategory === cat}
-                    onChange={() => setActiveCategory(cat)}
+                    onChange={() => handleCategoryChange(cat)}
                   />
                   <span className="shop-radio-custom"></span>
                   <span className="shop-filter-name">{cat}</span>
@@ -69,7 +86,7 @@ const Shop: React.FC = () => {
           <header className="shop-header">
             <div className="shop-header-info">
               <h1 className="shop-title">Our Products</h1>
-              <p className="item-stats">Showing 1-12 of 120 items</p>
+              <p className="item-stats">Showing {startItem}-{endItem} of {totalItems} items</p>
             </div>
             <div className="header-actions">
               <select className="shop-sort">
@@ -82,14 +99,35 @@ const Shop: React.FC = () => {
             </div>
           </header>
 
-          <ShopProductGrid category={activeCategory} />
+          <ShopProductGrid 
+            category={activeCategory} 
+            currentPage={currentPage} 
+            itemsPerPage={itemsPerPage} 
+            onTotalItems={handleTotalItems}
+          />
 
-          <div className="shop-pagination">
-            <button className="page-btn active">1</button>
-            <button className="page-btn">2</button>
-            <button className="page-btn">3</button>
-            <button className="page-btn next">Next</button>
-          </div>
+          {totalItems > itemsPerPage && (
+            <div className="shop-pagination">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button 
+                  key={page} 
+                  className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+              
+              {currentPage < totalPages && (
+                <button 
+                  className="page-btn next" 
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          )}
         </section>
       </main>
     </div>
