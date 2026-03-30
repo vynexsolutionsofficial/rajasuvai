@@ -12,7 +12,7 @@
 }
 
 .site-header.scrolled .navbar {
-  background: transparent;
+  background: #9D7E3E;
   height: 80px; /* Slimmer header on scroll */
 }
 
@@ -33,56 +33,18 @@
   text-decoration: none;
   display: flex;
   align-items: center;
+  min-width: 280px;
 }
 
-.logo-content {
-  display: flex;
-  flex-direction: column;
+.logo-image {
+  height: 130px;
+  width: 280px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-.logo-main {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-emblem {
-  width: 28px;
-  height: 28px;
-  background: #ff7b00;
-  /* Simple flame/bulb shape */
-  clip-path: path('M12 2C12 2 4 10 4 15C4 19.4183 7.58172 23 12 23C16.4183 23 20 19.4183 20 15C20 10 12 2 12 2Z');
-  position: relative;
-}
-
-.logo-emblem::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  background: #fff;
-  border-radius: 50%;
-  opacity: 0.6;
-}
-
-.logo-text {
-  font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: -0.5px;
-}
-
-.logo-subtext {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 4px;
-  font-weight: 500;
-  margin-top: -5px;
-  text-align: center;
+.navbar-logo:hover .logo-image {
+  transform: scale(1.08);
 }
 
 /* Center Section */

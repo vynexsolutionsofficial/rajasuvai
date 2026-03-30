@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Search, User } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import AuthModal from '../Auth/AuthModal';
+import logo from '../../../assets/logo.png';
 import './Navbar.css';
 
 const Navbar: React.FC = () => {
@@ -15,13 +16,7 @@ const Navbar: React.FC = () => {
       <div className="navbar-container">
         {/* Left: Logo Section */}
         <Link to="/" className="navbar-logo">
-          <div className="logo-content">
-            <div className="logo-main">
-              <div className="logo-emblem"></div>
-              <span className="logo-text">Rajasuvai..</span>
-            </div>
-            <span className="logo-subtext">ARTISAN SPICES</span>
-          </div>
+          <img src={logo} alt="Rajasuvai Logo" className="logo-image" />
         </Link>
 
         {/* Center: Navigation & Subtext */}
