@@ -4,7 +4,7 @@ export const getProducts = async (req, res) => {
   const { category, priceMin, priceMax, offset, limit } = req.query;
   
   try {
-    let query = supabase.from('products').select('id, name, price, category, image, description', { count: 'exact' });
+    let query = supabase.from('products').select('*', { count: 'exact' });
 
     if (category && category !== 'All') {
       query = query.eq('category', category);
@@ -24,6 +24,7 @@ export const getProducts = async (req, res) => {
     if (error) throw error;
     res.json({ products: data, total: count });
   } catch (error) {
+    console.error('FETCH_PRODUCTS_ERROR:', error);
     res.status(500).json({ error: error.message });
   }
 };

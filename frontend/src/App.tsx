@@ -60,6 +60,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/contact" element={<SupportPage />} />
+          <Route path="/story" element={<Home />} />
 
           {/* User Protected Routes */}
           <Route element={<UserProtectedRoute />}>

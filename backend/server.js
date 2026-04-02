@@ -7,7 +7,7 @@ import {
   sendOrderEmail,
   sendOrderStatusEmail
 } from './emailService.js';
-import { sendWhatsAppOTP } from './whatsappService.js';
+// import { sendWhatsAppOTP } from './whatsappService.js';
 // --- ROUTE IMPORTS ---
 import addressRoutes from './routes/addressRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
