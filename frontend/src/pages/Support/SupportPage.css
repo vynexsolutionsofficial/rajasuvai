@@ -1,9 +1,6 @@
-/* ============================================
-   SUPPORT / CONTACT PAGE — Premium Design
-   ============================================ */
-
+/* ===== SUPPORT PAGE OVERHAUL ===== */
 .support-page-wrapper {
-  background: #f8f5f0;
+  background: var(--bg-main);
   min-height: 100vh;
   font-family: 'Inter', sans-serif;
 }

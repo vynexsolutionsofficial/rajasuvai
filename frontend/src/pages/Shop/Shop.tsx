@@ -4,15 +4,27 @@ import './Shop.css';
 
 const Shop: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [activePriceRange, setActivePriceRange] = useState<[number, number | null] | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 12;
 
   const categories = ['All', 'Spices', 'Masalas', 'Oils', 'Snacks'];
+  const priceRanges: { label: string, value: [number, number | null] }[] = [
+    { label: 'All Prices', value: [0, null] },
+    { label: '₹0 - ₹200', value: [0, 200] },
+    { label: '₹200 - ₹500', value: [200, 500] },
+    { label: '₹500 & Above', value: [500, null] }
+  ];
 
   const handleCategoryChange = (cat: string) => {
     setActiveCategory(cat);
-    setCurrentPage(1); // Reset to page 1 on category change
+    setCurrentPage(1);
+  };
+
+  const handlePriceChange = (range: [number, number | null]) => {
+    setActivePriceRange(range[1] === null && range[0] === 0 ? undefined : range);
+    setCurrentPage(1);
   };
 
   const handleTotalItems = useCallback((total: number) => {
@@ -22,7 +34,6 @@ const Shop: React.FC = () => {
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-
 
   return (
     <div className="shop-page">
@@ -47,17 +58,18 @@ const Shop: React.FC = () => {
           </div>
 
           <div className="shop-filter-group">
-            <h3 className="shop-filter-title">Price</h3>
+            <h3 className="shop-filter-title">Price Range</h3>
             <div className="shop-filter-list">
-              {[
-                { label: '₹0 - ₹200', checked: true },
-                { label: '₹200 - ₹500', checked: false },
-                { label: '₹500 & Above', checked: false }
-              ].map((priceRange) => (
-                <label key={priceRange.label} className="shop-filter-item">
-                  <input type="checkbox" defaultChecked={priceRange.checked} />
-                  <span className="shop-check-custom"></span>
-                  <span className="shop-filter-name">{priceRange.label}</span>
+              {priceRanges.map((range) => (
+                <label key={range.label} className="shop-filter-item">
+                  <input 
+                    type="radio" 
+                    name="price"
+                    checked={(!activePriceRange && range.label === 'All Prices') || (activePriceRange?.[0] === range.value[0] && activePriceRange?.[1] === range.value[1])}
+                    onChange={() => handlePriceChange(range.value)} 
+                  />
+                  <span className="shop-radio-custom"></span>
+                  <span className="shop-filter-name">{range.label}</span>
                 </label>
               ))}
             </div>
@@ -68,7 +80,7 @@ const Shop: React.FC = () => {
             <div className="shop-filter-list">
               {[5, 4, 3].map((num) => (
                 <label key={num} className="shop-filter-item">
-                  <input type="checkbox" />
+                  <input type="checkbox" name="rating" />
                   <span className="shop-check-custom"></span>
                   <span className="shop-star-rating">
                     {Array(5).fill(0).map((_, i) => (
@@ -101,6 +113,7 @@ const Shop: React.FC = () => {
 
           <ShopProductGrid 
             category={activeCategory} 
+            priceRange={activePriceRange}
             currentPage={currentPage} 
             itemsPerPage={itemsPerPage} 
             onTotalItems={handleTotalItems}

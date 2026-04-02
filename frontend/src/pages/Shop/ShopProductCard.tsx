@@ -45,10 +45,13 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
     <div 
       className="shop-product-card" 
       onClick={() => navigate(`/product/${id}`)}
-      style={{ cursor: 'pointer' }}
     >
       <div className="shop-product-image-container">
-        {badge && <span className={`shop-badge badge-${badge.toLowerCase().replace(' ', '-')}`}>{badge}</span>}
+        {badge && (
+          <span className={`shop-badge badge-${badge.toLowerCase().replace(' ', '-')}`}>
+            {badge}
+          </span>
+        )}
         <img src={getProductImage(image, name)} alt={name} className="shop-product-image" />
       </div>
       
@@ -63,10 +66,9 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
         )}
         <p className="shop-product-price">₹{price.replace(/[^0-9.]/g, '')}</p>
         
-        <div className="shop-product-actions" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+        <div className="shop-product-actions">
           <button 
-            className="btn-add-cart" 
-            style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #2d3e50', borderRadius: '20px', color: '#2d3e50', cursor: 'pointer', fontWeight: 600 }}
+            className="btn-add-cart-mini" 
             onClick={(e) => {
               e.stopPropagation();
               addToCart(product);
@@ -75,8 +77,7 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
             Add to Cart
           </button>
           <button 
-            className="btn-buy-now"
-            style={{ flex: 1, padding: '8px', background: '#2d3e50', border: 'none', borderRadius: '20px', color: 'white', cursor: 'pointer', fontWeight: 600 }}
+            className="btn-buy-mini"
             onClick={(e) => {
               e.stopPropagation();
               addToCart(product);

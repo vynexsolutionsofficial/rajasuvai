@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 import ProductCard from '../ProductCard/ProductCard';
 import './ProductGrid.css';
 
@@ -21,45 +21,19 @@ const ProductGrid: React.FC<ProductGridProps> = ({ category }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Initial fetch from Supabase
     const fetchProducts = async () => {
       try {
-        let query = supabase.from('products').select('*');
-        
-        if (category && category !== 'All') {
-          query = query.eq('category', category);
-        }
-
-        const { data, error } = await query;
-        
-        if (error) throw error;
-        setProducts(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setLoading(true);
+        const data = await api.get('/api/products', { category });
+        setProducts(data.products || []);
+      } catch (err: any) {
+        setError(err.message || 'An error occurred fetching products');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-
-    // Subscribe to REALTIME changes
-    const channel = supabase
-      .channel('products-realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', table: 'products', schema: 'public' },
-        (payload) => {
-          console.log('Change received!', payload);
-          // Refresh products on any change
-          fetchProducts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [category]);
 
   if (loading) return <div className="loading container">Loading Collection...</div>;

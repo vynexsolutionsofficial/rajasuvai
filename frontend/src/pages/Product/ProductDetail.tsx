@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 import { useCart } from '../../context/CartContext';
 import './ProductDetail.css';
 
@@ -77,8 +77,8 @@ const ProductDetail: React.FC = () => {
       if (!id) return;
       try {
         setLoading(true);
-        const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
-        if (error) throw error;
+        const data = await api.get(`/api/products/${id}`);
+        if (data.error) throw new Error(data.error);
         setProduct(data);
       } catch (err: any) {
         setError('Product not found or failed to load.');

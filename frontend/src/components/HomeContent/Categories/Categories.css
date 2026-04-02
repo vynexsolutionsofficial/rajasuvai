@@ -101,16 +101,17 @@
 .categories-footer {
   display: flex;
   justify-content: center;
+  padding-bottom: 2rem;
 }
 
 .btn-browse-all {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 28px;
-  border: 1px solid #1a1a1a;
-  border-radius: 25px;
-  color: #1a1a1a;
+  padding: 12px 32px;
+  border: 1.5px solid var(--color-text-dark);
+  border-radius: 50px;
+  color: var(--color-text-dark);
   text-decoration: none;
   font-weight: 800;
   font-size: 0.85rem;
@@ -118,7 +119,7 @@
 }
 
 .btn-browse-all:hover {
-  background: #1a1a1a;
+  background: var(--color-text-dark);
   color: #fff;
 }
 

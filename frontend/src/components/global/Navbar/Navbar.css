@@ -12,8 +12,9 @@
 }
 
 .site-header.scrolled .navbar {
-  background: #9D7E3E;
+  background: var(--color-brand-orange);
   height: 65px; /* Slimmer header on scroll */
+  box-shadow: var(--shadow-glow);
 }
 
 /* Bokeh effect simulation - Removing for true transparency */
@@ -148,5 +149,23 @@
   .navbar-center {
     display: none;
   }
+}
+
+.admin-link {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  background: rgba(249, 168, 38, 0.1);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(249, 168, 38, 0.3);
+  margin-left: 10px;
+  transition: all 0.2s ease !important;
+}
+
+.admin-link:hover {
+  background: rgba(249, 168, 38, 0.2) !important;
+  transform: translateY(-1px);
+  opacity: 1 !important;
 }
 

@@ -13,18 +13,16 @@ const Hero: React.FC = () => {
             <div className="hero-badge">PURE ORGANIC SPICES</div>
             <h1 className="hero-title">
               EXPERIENCE THE <br />
-              <div className="title-bold">QUALITY OF</div>
-              <span className="text-mask">
-                every single grain.
-              </span>
+              QUALITY OF <br />
+              <span className="text-textured">every single grain.</span>
             </h1>
             <p className="hero-description">
               Sourced directly from local farms to ensure the highest quality for your kitchen.
             </p>
             
             <div className="hero-cta">
-              <Link to="/shop" className="btn btn-orange-solid">START SHOPPING</Link>
-              <Link to="/story" className="btn btn-outline-white">
+              <Link to="/shop" className="btn-artisan btn-artisan-orange">START SHOPPING</Link>
+              <Link to="/story" className="btn-artisan btn-outline-white">
                 OUR STORY <span className="arrow">→</span>
               </Link>
             </div>

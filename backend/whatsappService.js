@@ -40,10 +40,10 @@ client.on('auth_failure', (msg) => {
   console.error('WHATSAPP AUTH FAILURE:', msg);
 });
 
-client.initialize().catch(err => {
-  console.error('[WA-BOT] Failed to initialize WhatsApp client. The server will continue without WhatsApp support.');
-  console.error('[WA-BOT] Error details:', err.message);
-});
+// client.initialize().catch(err => {
+//   console.error('[WA-BOT] Failed to initialize WhatsApp client. The server will continue without WhatsApp support.');
+//   console.error('[WA-BOT] Error details:', err.message);
+// });
 
 /**
  * Send OTP via WhatsApp
