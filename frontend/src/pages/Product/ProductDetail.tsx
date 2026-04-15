@@ -120,11 +120,11 @@ const ProductDetail: React.FC = () => {
   return (
     <div className="pd-page">
       {/* ── Breadcrumb ── */}
-      <div className="pd-breadcrumb container">
+      <div className="pd-breadcrumb">
         <Link to="/">Home</Link> / <Link to="/shop">Shop</Link> / <span>{product.name}</span>
       </div>
 
-      <div className="pd-grid container">
+      <div className="pd-grid">
 
         {/* ════════════ LEFT: Image Gallery ════════════ */}
         <div className="pd-gallery">
@@ -240,105 +240,109 @@ const ProductDetail: React.FC = () => {
       </div>
 
       {/* ════════════ TABS: Description / Nutrition / Usage ════════════ */}
-      <div className="pd-tabs-section container">
-        <div className="pd-tabs">
-          {(['description', 'nutrition', 'usage'] as const).map(tab => (
-            <button
-              key={tab}
-              className={`pd-tab ${activeTab === tab ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
+      <div className="pd-tabs-section">
+        <div className="pd-tabs-inner">
+          <div className="pd-tabs">
+            {(['description', 'nutrition', 'usage'] as const).map(tab => (
+              <button
+                key={tab}
+                className={`pd-tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
 
-        <div className="pd-tab-content">
-          {activeTab === 'description' && (
-            <div className="pd-description">
-              <h3>About This Product</h3>
-              <p>{description}</p>
-              <div className="pd-key-features">
-                <div className="pd-feature"><span>🌱</span><p><strong>Sourcing</strong><br />Directly from certified farms in South India</p></div>
-                <div className="pd-feature"><span>🧪</span><p><strong>Lab Tested</strong><br />Third-party quality & purity certified</p></div>
-                <div className="pd-feature"><span>📦</span><p><strong>Packaging</strong><br />Nitrogen-flushed, airtight, biodegradable</p></div>
-                <div className="pd-feature"><span>⏳</span><p><strong>Shelf Life</strong><br />18 months from date of manufacture</p></div>
+          <div className="pd-tab-content">
+            {activeTab === 'description' && (
+              <div className="pd-description">
+                <h3>About This Product</h3>
+                <p>{description}</p>
+                <div className="pd-key-features">
+                  <div className="pd-feature"><span>🌱</span><p><strong>Sourcing</strong><br />Directly from certified farms in South India</p></div>
+                  <div className="pd-feature"><span>🧪</span><p><strong>Lab Tested</strong><br />Third-party quality &amp; purity certified</p></div>
+                  <div className="pd-feature"><span>📦</span><p><strong>Packaging</strong><br />Nitrogen-flushed, airtight, biodegradable</p></div>
+                  <div className="pd-feature"><span>⏳</span><p><strong>Shelf Life</strong><br />18 months from date of manufacture</p></div>
+                </div>
               </div>
-            </div>
-          )}
-          {activeTab === 'nutrition' && (
-            <div className="pd-nutrition">
-              <h3>Nutrition Facts <small>(per 100g)</small></h3>
-              <table className="pd-nutrition-table">
-                <tbody>
-                  {[
-                    ['Energy', '354 kcal'], ['Protein', '7.8g'], ['Carbohydrates', '64.9g'],
-                    ['Dietary Fibre', '22.7g'], ['Total Fat', '9.9g'], ['Saturated Fat', '2.1g'],
-                    ['Sodium', '38mg'], ['Calcium', '182mg'], ['Iron', '47.5mg'],
-                  ].map(([label, value]) => (
-                    <tr key={label}><td>{label}</td><td><strong>{value}</strong></td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          {activeTab === 'usage' && (
-            <div className="pd-usage">
-              <h3>How to Use</h3>
-              <div className="pd-usage-steps">
-                <div className="pd-step"><span className="step-num">1</span><p><strong>Measure</strong> — Use ½–1 tsp per serving for optimal flavour.</p></div>
-                <div className="pd-step"><span className="step-num">2</span><p><strong>Temper</strong> — Add to hot oil or ghee at the start of cooking to bloom the spice.</p></div>
-                <div className="pd-step"><span className="step-num">3</span><p><strong>Finish</strong> — Sprinkle a pinch near the end of cooking to brighten aroma.</p></div>
-                <div className="pd-step"><span className="step-num">4</span><p><strong>Store</strong> — Keep in a cool, dry, airtight container away from sunlight.</p></div>
+            )}
+            {activeTab === 'nutrition' && (
+              <div className="pd-nutrition">
+                <h3>Nutrition Facts <small>(per 100g)</small></h3>
+                <table className="pd-nutrition-table">
+                  <tbody>
+                    {[
+                      ['Energy', '354 kcal'], ['Protein', '7.8g'], ['Carbohydrates', '64.9g'],
+                      ['Dietary Fibre', '22.7g'], ['Total Fat', '9.9g'], ['Saturated Fat', '2.1g'],
+                      ['Sodium', '38mg'], ['Calcium', '182mg'], ['Iron', '47.5mg'],
+                    ].map(([label, value]) => (
+                      <tr key={label}><td>{label}</td><td><strong>{value}</strong></td></tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          )}
+            )}
+            {activeTab === 'usage' && (
+              <div className="pd-usage">
+                <h3>How to Use</h3>
+                <div className="pd-usage-steps">
+                  <div className="pd-step"><span className="step-num">1</span><p><strong>Measure</strong> — Use ½–1 tsp per serving for optimal flavour.</p></div>
+                  <div className="pd-step"><span className="step-num">2</span><p><strong>Temper</strong> — Add to hot oil or ghee at the start of cooking to bloom the spice.</p></div>
+                  <div className="pd-step"><span className="step-num">3</span><p><strong>Finish</strong> — Sprinkle a pinch near the end of cooking to brighten aroma.</p></div>
+                  <div className="pd-step"><span className="step-num">4</span><p><strong>Store</strong> — Keep in a cool, dry, airtight container away from sunlight.</p></div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ════════════ REVIEWS ════════════ */}
-      <div className="pd-reviews-section container">
-        <div className="pd-reviews-header">
-          <div>
-            <h2 className="pd-reviews-title">Customer Reviews</h2>
-            <p className="pd-reviews-sub">Based on 124 verified purchases</p>
-          </div>
-          <div className="pd-overall-rating">
-            <span className="pd-big-rating">{rating}</span>
+      <div className="pd-reviews-section">
+        <div className="pd-reviews-inner">
+          <div className="pd-reviews-header">
             <div>
-              <div className="pd-stars-lg">{[1,2,3,4,5].map(s=><span key={s} className={s<=Math.round(rating)?'star-on':'star-off'}>★</span>)}</div>
-              <p>4.8 out of 5</p>
+              <h2 className="pd-reviews-title">Customer Reviews</h2>
+              <p className="pd-reviews-sub">Based on 124 verified purchases</p>
+            </div>
+            <div className="pd-overall-rating">
+              <span className="pd-big-rating">{rating}</span>
+              <div>
+                <div className="pd-stars-lg">{[1,2,3,4,5].map(s=><span key={s} className={s<=Math.round(rating)?'star-on':'star-off'}>★</span>)}</div>
+                <p>4.8 out of 5</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Rating bars */}
-        <div className="pd-rating-bars">
-          {[[5,78],[4,18],[3,3],[2,1],[1,0]].map(([stars, pct])=>(
-            <div key={stars} className="pd-bar-row">
-              <span>{stars}★</span>
-              <div className="pd-bar-track"><div className="pd-bar-fill" style={{width:`${pct}%`}}></div></div>
-              <span>{pct}%</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Review cards */}
-        <div className="pd-review-cards">
-          {STATIC_REVIEWS.map(r => (
-            <div key={r.id} className="pd-review-card">
-              <div className="pd-review-top">
-                <div className="pd-reviewer-avatar">{r.avatar}</div>
-                <div>
-                  <strong>{r.name}</strong>
-                  {r.verified && <span className="pd-verified">✓ Verified Purchase</span>}
-                  <p className="pd-review-date">{r.date}</p>
-                </div>
-                <div className="pd-review-stars">{'★'.repeat(r.stars)}{'☆'.repeat(5-r.stars)}</div>
+          {/* Rating bars */}
+          <div className="pd-rating-bars">
+            {[[5,78],[4,18],[3,3],[2,1],[1,0]].map(([stars, pct])=>(
+              <div key={stars} className="pd-bar-row">
+                <span>{stars}★</span>
+                <div className="pd-bar-track"><div className="pd-bar-fill" style={{width:`${pct}%`}}></div></div>
+                <span>{pct}%</span>
               </div>
-              <p className="pd-review-text">"{r.text}"</p>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Review cards */}
+          <div className="pd-review-cards">
+            {STATIC_REVIEWS.map(r => (
+              <div key={r.id} className="pd-review-card">
+                <div className="pd-review-top">
+                  <div className="pd-reviewer-avatar">{r.avatar}</div>
+                  <div>
+                    <strong>{r.name}</strong>
+                    {r.verified && <span className="pd-verified">✓ Verified Purchase</span>}
+                    <p className="pd-review-date">{r.date}</p>
+                  </div>
+                  <div className="pd-review-stars">{'★'.repeat(r.stars)}{'☆'.repeat(5-r.stars)}</div>
+                </div>
+                <p className="pd-review-text">"{r.text}"</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

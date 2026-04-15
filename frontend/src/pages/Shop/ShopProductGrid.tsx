@@ -14,7 +14,6 @@ interface Product {
 interface ShopProductGridProps {
   category: string;
   priceRange?: [number, number | null];
-  minRating?: number;
   currentPage: number;
   itemsPerPage: number;
   onTotalItems: (total: number) => void;
@@ -23,7 +22,6 @@ interface ShopProductGridProps {
 const ShopProductGrid: React.FC<ShopProductGridProps> = ({ 
   category, 
   priceRange,
-  minRating,
   currentPage, 
   itemsPerPage, 
   onTotalItems 

@@ -506,7 +506,7 @@ body::before {
    ========================================= */
 @media (max-width: 768px) {
   .shop-page {
-    padding-top: 80px !important;
+    padding-top: 70px !important;
   }
 
   .shop-layout {
@@ -570,18 +570,11 @@ body::before {
     padding: 1.5rem !important;
   }
 
-  .checkout-btn,
-  [class*="checkout"] button,
-  [class*="pay"] button {
-    position: fixed !important;
-    bottom: calc(var(--mobile-bottom-nav-height) + 0.75rem) !important;
-    left: 1rem !important;
-    right: 1rem !important;
-    z-index: 1500 !important;
-    border-radius: 50px !important;
-    padding: 1.1rem !important;
+  .checkout-btn {
+    width: 100% !important;
+    border-radius: 10px !important;
+    padding: 14px !important;
     justify-content: center !important;
-    box-shadow: 0 8px 24px var(--color-focus-glow) !important;
   }
 }
 
@@ -744,7 +737,7 @@ body::before {
 @media (max-width: 768px) {
   footer,
   .footer {
-    padding-bottom: calc(var(--mobile-bottom-nav-height) + 1rem) !important;
+    padding-bottom: 80px !important;
   }
   
   .footer-grid,

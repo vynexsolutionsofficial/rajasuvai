@@ -10,11 +10,11 @@ const Shop: React.FC = () => {
   const itemsPerPage = 12;
 
   const categories = ['All', 'Spices', 'Masalas', 'Oils', 'Snacks'];
-  const priceRanges: { label: string, value: [number, number | null] }[] = [
+  const priceRanges: { label: string; value: [number, number | null] }[] = [
     { label: 'All Prices', value: [0, null] },
     { label: '₹0 - ₹200', value: [0, 200] },
     { label: '₹200 - ₹500', value: [200, 500] },
-    { label: '₹500 & Above', value: [500, null] }
+    { label: '₹500 & Above', value: [500, null] },
   ];
 
   const handleCategoryChange = (cat: string) => {
@@ -37,8 +37,11 @@ const Shop: React.FC = () => {
 
   return (
     <div className="shop-page">
-      <main className="shop-container container">
+      <main className="shop-container">
+
+        {/* ── Sidebar ── */}
         <aside className="shop-sidebar">
+          {/* Categories */}
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Categories</h3>
             <div className="shop-filter-list">
@@ -57,16 +60,21 @@ const Shop: React.FC = () => {
             </div>
           </div>
 
+          {/* Price Range */}
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Price Range</h3>
             <div className="shop-filter-list">
               {priceRanges.map((range) => (
                 <label key={range.label} className="shop-filter-item">
-                  <input 
-                    type="radio" 
+                  <input
+                    type="radio"
                     name="price"
-                    checked={(!activePriceRange && range.label === 'All Prices') || (activePriceRange?.[0] === range.value[0] && activePriceRange?.[1] === range.value[1])}
-                    onChange={() => handlePriceChange(range.value)} 
+                    checked={
+                      (!activePriceRange && range.label === 'All Prices') ||
+                      (activePriceRange?.[0] === range.value[0] &&
+                        activePriceRange?.[1] === range.value[1])
+                    }
+                    onChange={() => handlePriceChange(range.value)}
                   />
                   <span className="shop-radio-custom"></span>
                   <span className="shop-filter-name">{range.label}</span>
@@ -75,6 +83,7 @@ const Shop: React.FC = () => {
             </div>
           </div>
 
+          {/* Customer Ratings */}
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Customer Ratings</h3>
             <div className="shop-filter-list">
@@ -83,10 +92,14 @@ const Shop: React.FC = () => {
                   <input type="checkbox" name="rating" />
                   <span className="shop-check-custom"></span>
                   <span className="shop-star-rating">
-                    {Array(5).fill(0).map((_, i) => (
-                      <span key={i} style={{ opacity: i < num ? 1 : 0.2 }}>★</span>
-                    ))}
-                    <span style={{ color: '#888', marginLeft: '5px' }}>& Up</span>
+                    {Array(5)
+                      .fill(0)
+                      .map((_, i) => (
+                        <span key={i} style={{ opacity: i < num ? 1 : 0.2 }}>
+                          ★
+                        </span>
+                      ))}
+                    <span style={{ color: '#888', marginLeft: '4px', fontSize: '12px' }}>& Up</span>
                   </span>
                 </label>
               ))}
@@ -94,49 +107,49 @@ const Shop: React.FC = () => {
           </div>
         </aside>
 
+        {/* ── Main Content ── */}
         <section className="shop-main">
           <header className="shop-header">
             <div className="shop-header-info">
               <h1 className="shop-title">Our Products</h1>
-              <p className="item-stats">Showing {startItem}-{endItem} of {totalItems} items</p>
+              <p className="item-stats">
+                Showing {startItem}–{endItem} of {totalItems} items
+              </p>
             </div>
             <div className="header-actions">
               <select className="shop-sort">
-                <option>Sort by: Popularity</option>
+                <option>Sort: Popularity</option>
                 <option>Price: Low to High</option>
+                <option>Price: High to Low</option>
               </select>
-              <button className="filter-btn-orange">
-                <span>↑</span> Filter
-              </button>
             </div>
           </header>
 
-          <ShopProductGrid 
-            category={activeCategory} 
+          <ShopProductGrid
+            category={activeCategory}
             priceRange={activePriceRange}
-            currentPage={currentPage} 
-            itemsPerPage={itemsPerPage} 
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
             onTotalItems={handleTotalItems}
           />
 
           {totalItems > itemsPerPage && (
             <div className="shop-pagination">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button 
-                  key={page} 
+                <button
+                  key={page}
                   className={`page-btn ${currentPage === page ? 'active' : ''}`}
                   onClick={() => setCurrentPage(page)}
                 >
                   {page}
                 </button>
               ))}
-              
               {currentPage < totalPages && (
-                <button 
-                  className="page-btn next" 
-                  onClick={() => setCurrentPage(prev => prev + 1)}
+                <button
+                  className="page-btn next"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
                 >
-                  Next
+                  Next →
                 </button>
               )}
             </div>

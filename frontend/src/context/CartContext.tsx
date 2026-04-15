@@ -49,7 +49,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (!user && newUser) {
         // User just logged in - Merge guest cart
-        syncGuestCart(newUser);
+        syncGuestCart();
       } else if (user && !newUser) {
         // User just logged out - Reset to empty (or local storage if preferred)
         setCart([]);
@@ -73,7 +73,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const syncGuestCart = async (targetUser: any) => {
+  const syncGuestCart = async () => {
     try {
       setLoading(true);
       const local = localStorage.getItem('rajasuvai_cart');

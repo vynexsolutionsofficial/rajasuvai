@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, Smartphone, CreditCard, Landmark, Wallet, Banknote, CalendarDays, MapPin } from 'lucide-react';
+import { ShieldCheck, Smartphone, CreditCard, Landmark } from 'lucide-react';
 import { api } from '../../services/api';
 import './checkout.css';
 

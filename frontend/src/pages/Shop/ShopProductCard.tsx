@@ -15,8 +15,8 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { id, name, price, image } = product;
-  
-  // High-fidelity image mapping for trial
+
+  // Image mapping
   const getProductImage = (img: string, productName: string) => {
     const lowerName = productName.toLowerCase();
     if (lowerName.includes('turmeric')) return '/products/turmeric.png';
@@ -32,59 +32,51 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
     return img;
   };
 
-  // Badges matching reference screenshots
-  let badge = null;
+  // Badge logic
+  let badge: string | null = null;
   if (name.includes('Turmeric') || name.includes('Coconut')) badge = 'NEW';
   else if (name.includes('Chilli')) badge = 'HOT';
   else if (name.includes('Cashew')) badge = 'SALE';
-  else if (name.includes('Amla')) badge = 'BEST SELLER';
+  else if (name.includes('Amla')) badge = 'BESTSELLER';
 
-  const rating = name.includes('Garam') ? 4 : 0;
+  // Mocked weight & old price
+  const weight = '250g';
+  const numericPrice = parseFloat(price.replace(/[^0-9.]/g, '')) || 0;
+  const oldPrice = Math.round(numericPrice * 1.2);
 
   return (
-    <div 
-      className="shop-product-card" 
+    <div
+      className="sp-card"
       onClick={() => navigate(`/product/${id}`)}
     >
-      <div className="shop-product-image-container">
-        {badge && (
-          <span className={`shop-badge badge-${badge.toLowerCase().replace(' ', '-')}`}>
-            {badge}
-          </span>
-        )}
-        <img src={getProductImage(image, name)} alt={name} className="shop-product-image" />
+      {/* Image Section */}
+      <div className="sp-image-wrap">
+        {badge && <span className="sp-badge">{badge}</span>}
+        <img
+          src={getProductImage(image, name)}
+          alt={name}
+          className="sp-image"
+        />
       </div>
-      
-      <div className="shop-product-details">
-        <h3 className="shop-product-name">{name}</h3>
-        {rating > 0 && (
-          <div className="shop-product-rating">
-            {Array(5).fill(0).map((_, i) => (
-              <span key={i} className={i < rating ? 'star-filled' : 'star-empty'}>★</span>
-            ))}
+
+      {/* Content Section */}
+      <div className="sp-content">
+        <h3 className="sp-name">{name}</h3>
+        <p className="sp-weight">{weight}</p>
+
+        <div className="sp-footer">
+          <div className="sp-prices">
+            <span className="sp-price">₹{numericPrice}</span>
+            <span className="sp-old-price">₹{oldPrice}</span>
           </div>
-        )}
-        <p className="shop-product-price">₹{price.replace(/[^0-9.]/g, '')}</p>
-        
-        <div className="shop-product-actions">
-          <button 
-            className="btn-add-cart-mini" 
+          <button
+            className="sp-add-btn"
             onClick={(e) => {
               e.stopPropagation();
               addToCart(product);
             }}
           >
-            Add to Cart
-          </button>
-          <button 
-            className="btn-buy-mini"
-            onClick={(e) => {
-              e.stopPropagation();
-              addToCart(product);
-              navigate('/cart');
-            }}
-          >
-            Buy
+            ADD
           </button>
         </div>
       </div>
