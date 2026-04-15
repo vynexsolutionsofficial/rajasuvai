@@ -49,16 +49,6 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="footer-links-col">
-            <h4>OUR STORY</h4>
-            <ul>
-              <li><Link to="/about">About Us</Link></li>
-              <li><Link to="/sustainability">Sustainability</Link></li>
-              <li><Link to="/sourcing">Direct Sourcing</Link></li>
-              <li><Link to="/tradition">Tradition</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-links-col">
             <h4>CUSTOMER CARE</h4>
             <ul>
               <li><Link to="/contact">Contact Support</Link></li>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingCart, Search, User, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, Search, User, ShieldCheck, Menu, X } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import { supabase } from '../../../supabaseClient';
 import AuthModal from '../Auth/AuthModal';
@@ -12,6 +12,12 @@ const Navbar: React.FC = () => {
   const { cartCount } = useCart();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -62,7 +68,13 @@ const Navbar: React.FC = () => {
         </Link>
 
         {/* Center: Navigation */}
-        <div className="nav-links">
+        <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <div className="mobile-menu-header">
+            <span className="mobile-menu-title">Menu</span>
+            <button className="mobile-menu-close" onClick={() => setIsMobileMenuOpen(false)}>
+              <X size={24} />
+            </button>
+          </div>
           <Link to="/" className={location.pathname === '/' ? 'active' : ''}>HOME</Link>
           <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>SHOP SPICES</Link>
           <Link to="/story" className={location.pathname === '/story' ? 'active' : ''}>OUR STORY</Link>
@@ -80,6 +92,10 @@ const Navbar: React.FC = () => {
 
         {/* Right: Icons & Shop Now */}
         <div className="navbar-right">
+          <button className="navbar-icon-btn mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu size={24} />
+          </button>
+          
           <button className="navbar-icon-btn">
             <Search size={22} />
           </button>

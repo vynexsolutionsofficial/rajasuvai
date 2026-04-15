@@ -11,6 +11,13 @@ import CheckoutPage from './pages/Checkout/CheckoutPage';
 import AddressSelection from './pages/Checkout/AddressSelection';
 import AnnouncementBar from './components/global/AnnouncementBar/AnnouncementBar';
 
+// New Pages
+import OurStory from './pages/About/OurStory';
+import ShippingPolicy from './pages/Policies/ShippingPolicy';
+import ReturnsPolicy from './pages/Policies/ReturnsPolicy';
+import PrivacyPolicy from './pages/Policies/PrivacyPolicy';
+import TermsOfService from './pages/Policies/TermsOfService';
+
 // Admin Components
 import AdminLayout from './components/admin/AdminLayout';
 import ProtectedRoute from './components/admin/ProtectedRoute';
@@ -24,8 +31,6 @@ import Settings from './pages/Admin/Settings';
 
 import Profile from './pages/Profile/Profile';
 import UserProtectedRoute from './components/admin/UserProtectedRoute';
-import MobileBottomNav from './components/global/MobileNav/MobileBottomNav';
-
 function App() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,6 +43,11 @@ function App() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Scroll to top on navigation
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isHome = location.pathname === '/';
@@ -60,7 +70,13 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/contact" element={<SupportPage />} />
-          <Route path="/story" element={<Home />} />
+          <Route path="/story" element={<OurStory />} />
+          
+          {/* Policy Routes */}
+          <Route path="/shipping" element={<ShippingPolicy />} />
+          <Route path="/returns" element={<ReturnsPolicy />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
 
           {/* User Protected Routes */}
           <Route element={<UserProtectedRoute />}>
@@ -85,7 +101,6 @@ function App() {
       </main>
 
       {!isAdminRoute && <Footer />}
-      {!isAdminRoute && <MobileBottomNav />}
     </div>
   );
 }

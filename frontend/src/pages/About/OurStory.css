@@ -1,0 +1,181 @@
+/* Our Story Page Styles */
+.our-story-page {
+  padding-top: 80px; /* Accounts for fixed navbar */
+  background-color: transparent;
+  color: var(--color-text);
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.story-hero {
+  position: relative;
+  height: 400px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.story-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 15, 20, 0.7); /* Dark overlay */
+}
+
+.story-hero-content {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.story-hero-content h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.story-hero-content p {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+/* Introduction Section */
+.story-intro {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.intro-text {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.intro-text h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #1a1510;
+}
+
+.intro-text p {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: #555;
+}
+
+/* Pillars Section */
+.story-pillars {
+  padding: 40px 20px 100px;
+}
+
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.pillar-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pillar-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-color: #ff7b00;
+}
+
+.pillar-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  background: rgba(255, 123, 0, 0.1);
+  color: #ff7b00;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pillar-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #1a1510;
+}
+
+.pillar-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+/* CTA Section */
+.story-cta {
+  background: #1a1510;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.story-cta h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.story-cta p {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 30px;
+}
+
+.story-btn {
+  display: inline-block;
+  background: #ff7b00;
+  color: #fff;
+  padding: 15px 40px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.story-btn:hover {
+  background: #e66a00;
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .story-hero {
+    height: 300px;
+  }
+  
+  .story-hero-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .intro-text h2,
+  .story-cta h2 {
+    font-size: 2rem;
+  }
+  
+  .pillar-card {
+    padding: 30px 20px;
+  }
+}
