@@ -12,7 +12,7 @@ import {
   X
 } from 'lucide-react';
 import './OffersManagement.css';
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 
 interface Coupon {
   id: number;
@@ -50,25 +50,6 @@ const OffersManagement: React.FC = () => {
     usage_limit: 100
   });
 
-  const getAuthToken = async () => {
-    if (localStorage.getItem('rajasuvai_dev_admin') === 'true') return 'DEV_ADMIN_TOKEN';
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  };
-
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const token = await getAuthToken();
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    return fetch(`${baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      }
-    });
-  };
-
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -76,10 +57,10 @@ const OffersManagement: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await apiFetch(`/api/admin/${activeTab}`);
-      if (response.ok) {
-        if (activeTab === 'coupons') setCoupons(await response.json());
-        else setPayments(await response.json());
+      const data = await api.get(`/api/admin/${activeTab}`);
+      if (data) {
+        if (activeTab === 'coupons') setCoupons(data);
+        else setPayments(data);
       }
     } catch (err) {
       console.error(err);
@@ -91,11 +72,8 @@ const OffersManagement: React.FC = () => {
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await apiFetch('/api/admin/coupons', {
-        method: 'POST',
-        body: JSON.stringify(newCoupon)
-      });
-      if (response.ok) {
+      const data = await api.post('/api/admin/coupons', newCoupon);
+      if (!data.error) {
         fetchData();
         setIsModalOpen(false);
         setNewCoupon({ discount_type: 'percentage', usage_limit: 100 });
@@ -108,8 +86,8 @@ const OffersManagement: React.FC = () => {
   const handleDeleteCoupon = async (id: number) => {
     if (!window.confirm('Delete this coupon?')) return;
     try {
-      const response = await apiFetch(`/api/admin/coupons/${id}`, { method: 'DELETE' });
-      if (response.ok) fetchData();
+      const data = await api.delete(`/api/admin/coupons/${id}`);
+      if (!data.error) fetchData();
     } catch (err) {
       console.error(err);
     }

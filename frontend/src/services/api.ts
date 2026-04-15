@@ -68,6 +68,19 @@ export const api = {
     return response.json();
   },
 
+  async patch(endpoint: string, body: any) {
+    const token = await getAuthToken();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    return response.json();
+  },
+
   async delete(endpoint: string) {
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

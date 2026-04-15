@@ -3,6 +3,8 @@ import { X, ChevronRight } from 'lucide-react';
 import { supabase } from '../../../supabaseClient';
 import './AuthModal.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 interface AuthModalProps {
   onClose: () => void;
 }
@@ -93,7 +95,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
 
   const sendOtp = async (phone: string, mode: 'login' | 'signup') => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/send-otp', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, mode })
@@ -133,7 +135,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setLoading(true);
     setMessage(null);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/verify-otp', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: phoneNumber, otp })
@@ -163,7 +165,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     try {
       // For new registrations, we should technically handle OTP first if we wanted WhatsApp verification,
       // but based on the user request, we just "check if mobile is registered... if no add to db".
-      const response = await fetch('http://localhost:3000/api/auth/register', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, phone: phoneNumber })

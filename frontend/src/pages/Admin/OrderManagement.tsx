@@ -16,7 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import './ProductManagement.css'; 
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 
 interface OrderItem {
   id: number;
@@ -49,25 +49,6 @@ const OrderManagement: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
 
-  const getAuthToken = async () => {
-    if (localStorage.getItem('rajasuvai_dev_admin') === 'true') return 'DEV_ADMIN_TOKEN';
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  };
-
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const token = await getAuthToken();
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    return fetch(`${baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      }
-    });
-  };
-
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -75,10 +56,8 @@ const OrderManagement: React.FC = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const response = await apiFetch('/api/admin/orders');
-      if (response.ok) {
-        setOrders(await response.json());
-      }
+      const data = await api.get('/api/admin/orders');
+      if (data) setOrders(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -90,10 +69,8 @@ const OrderManagement: React.FC = () => {
     setModalLoading(true);
     setIsModalOpen(true);
     try {
-      const response = await apiFetch(`/api/admin/orders/${id}`);
-      if (response.ok) {
-        setSelectedOrder(await response.json());
-      }
+      const data = await api.get(`/api/admin/orders/${id}`);
+      if (data) setSelectedOrder(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -103,19 +80,15 @@ const OrderManagement: React.FC = () => {
 
   const updateStatus = async (id: number, newStatus: string) => {
     try {
-      const response = await apiFetch(`/api/admin/orders/${id}/status`, {
-        method: 'POST',
-        body: JSON.stringify({ status: newStatus })
-      });
+      const data = await api.post(`/api/admin/orders/${id}/status`, { status: newStatus });
       
-      if (response.ok) {
+      if (!data.error) {
         fetchOrders();
         if (selectedOrder?.id === id) {
           fetchOrderDetails(id);
         }
       } else {
-        const err = await response.json();
-        alert(err.error || 'Failed to update status');
+        alert(data.error || 'Failed to update status');
       }
     } catch (err) {
       console.error(err);

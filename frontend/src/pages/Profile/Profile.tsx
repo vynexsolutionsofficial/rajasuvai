@@ -17,6 +17,7 @@ import {
   X
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 import './Profile.css';
 
 interface UserProfile {
@@ -70,28 +71,10 @@ const Profile: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-  const getAuthToken = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || (localStorage.getItem('rajasuvai_dev_admin') === 'true' ? 'DEV_ADMIN_TOKEN' : null);
-  };
-
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const token = await getAuthToken();
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    return fetch(`${baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      }
-    });
-  };
-
   const fetchAddresses = async () => {
     try {
-      const res = await apiFetch('/api/addresses');
-      if (res.ok) setAddresses(await res.json());
+      const data = await api.get('/api/addresses');
+      if (data) setAddresses(data);
     } catch (err) {
       console.error('Error fetching addresses:', err);
     }
@@ -101,13 +84,13 @@ const Profile: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [profileRes, ordersRes] = await Promise.all([
-          apiFetch('/api/users/profile'),
-          apiFetch('/api/orders/my-orders')
+        const [profileData, ordersData] = await Promise.all([
+          api.get('/api/users/profile'),
+          api.get('/api/orders/my-orders')
         ]);
 
-        if (profileRes.ok) setProfile(await profileRes.json());
-        if (ordersRes.ok) setOrders(await ordersRes.json());
+        if (profileData) setProfile(profileData);
+        if (ordersData) setOrders(ordersData);
         await fetchAddresses();
       } catch (err) {
         console.error('Error fetching profile data:', err);
@@ -126,19 +109,16 @@ const Profile: React.FC = () => {
     setSaving(true);
     setMessage(null);
     try {
-      const response = await apiFetch('/api/users/profile', {
-        method: 'PATCH',
-        body: JSON.stringify({
-          name: profile.name,
-          phone: profile.phone,
-          address: profile.address
-        })
+      const resData = await api.patch('/api/users/profile', {
+        name: profile.name,
+        phone: profile.phone,
+        address: profile.address
       });
 
-      if (response.ok) {
+      if (!resData.error) {
         setMessage({ type: 'success', text: 'Profile updated successfully!' });
       } else {
-        setMessage({ type: 'error', text: 'Failed to update profile.' });
+        setMessage({ type: 'error', text: resData.error || 'Failed to update profile.' });
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Connection error.' });
@@ -173,10 +153,7 @@ const Profile: React.FC = () => {
     const mockUrl = URL.createObjectURL(file);
     setProfile(prev => prev ? { ...prev, photo_url: mockUrl } : null);
     try {
-      await apiFetch('/api/users/profile', {
-        method: 'PATCH',
-        body: JSON.stringify({ photo_url: mockUrl })
-      });
+      await api.patch('/api/users/profile', { photo_url: mockUrl });
       setMessage({ type: 'success', text: 'Profile photo updated!' });
     } catch (err) {
       console.error('Error updating photo:', err);
@@ -188,19 +165,17 @@ const Profile: React.FC = () => {
     setSaving(true);
     try {
       const endpoint = editingAddress ? `/api/addresses/${editingAddress.id}` : '/api/addresses';
-      const method = editingAddress ? 'PUT' : 'POST';
-      const res = await apiFetch(endpoint, {
-        method,
-        body: JSON.stringify(tempAddress)
-      });
-      if (res.ok) {
+      const resData = editingAddress 
+        ? await api.put(endpoint, tempAddress)
+        : await api.post(endpoint, tempAddress);
+        
+      if (!resData.error) {
         await fetchAddresses();
         setShowAddressModal(false);
         setEditingAddress(null);
         setMessage({ type: 'success', text: editingAddress ? 'Address updated!' : 'Address added!' });
       } else {
-        const errData = await res.json();
-        setMessage({ type: 'error', text: errData.error || 'Failed to save address.' });
+        setMessage({ type: 'error', text: resData.error || 'Failed to save address.' });
       }
     } catch (err) {
       console.error('Error saving address:', err);
@@ -213,12 +188,12 @@ const Profile: React.FC = () => {
   const handleDeleteAddress = async (id: number) => {
     if (!confirm('Are you sure you want to delete this address?')) return;
     try {
-      const res = await apiFetch(`/api/addresses/${id}`, { method: 'DELETE' });
-      if (res.ok) {
+      const resData = await api.delete(`/api/addresses/${id}`);
+      if (!resData.error) {
         setAddresses(prev => prev.filter(a => a.id !== id));
         setMessage({ type: 'success', text: 'Address deleted.' });
       } else {
-        setMessage({ type: 'error', text: 'Failed to delete address.' });
+        setMessage({ type: 'error', text: resData.error || 'Failed to delete address.' });
       }
     } catch (err) {
       console.error('Error deleting address:', err);

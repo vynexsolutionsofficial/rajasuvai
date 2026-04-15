@@ -10,7 +10,7 @@ import {
   User as UserIcon
 } from 'lucide-react';
 import './UserManagement.css';
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 
 interface User {
   id: number;
@@ -27,25 +27,6 @@ const UserManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const getAuthToken = async () => {
-    if (localStorage.getItem('rajasuvai_dev_admin') === 'true') return 'DEV_ADMIN_TOKEN';
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  };
-
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const token = await getAuthToken();
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    return fetch(`${baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      }
-    });
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -53,10 +34,8 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await apiFetch('/api/admin/users');
-      if (response.ok) {
-        setUsers(await response.json());
-      }
+      const data = await api.get('/api/admin/users');
+      setUsers(data);
     } catch (err) {
       console.error(err);
     } finally {

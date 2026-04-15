@@ -21,7 +21,7 @@ import {
   Area
 } from 'recharts';
 import './Dashboard.css';
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState({
@@ -36,29 +36,16 @@ const Dashboard: React.FC = () => {
   const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const getAuthToken = async () => {
-    if (localStorage.getItem('rajasuvai_dev_admin') === 'true') return 'DEV_ADMIN_TOKEN';
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  };
-
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const token = await getAuthToken();
-        if (!token) return;
-
-        const headers = { 'Authorization': `Bearer ${token}` };
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-        const [statsRes, analyticsRes] = await Promise.all([
-          fetch(`${baseUrl}/api/admin/dashboard-stats`, { headers }),
-          fetch(`${baseUrl}/api/admin/analytics`, { headers })
+        const [sData, aData] = await Promise.all([
+          api.get('/api/admin/dashboard-stats'),
+          api.get('/api/admin/analytics')
         ]);
         
-        if (statsRes.ok) {
-          const sData = await statsRes.json();
+        if (sData) {
           setStats({
             totalSales: sData.totalRevenue,
             totalOrders: sData.totalOrders,
@@ -69,8 +56,7 @@ const Dashboard: React.FC = () => {
           setLowStockProducts(sData.lowStock || []);
         }
 
-        if (analyticsRes.ok) {
-          const aData = await analyticsRes.json();
+        if (aData) {
           setAnalytics(aData.monthlyRevenue);
           setTopProducts(aData.topProducts);
         }

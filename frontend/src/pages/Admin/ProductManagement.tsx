@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, X, Loader2, AlertTriangle, Package } from 'lucide-react';
 import './ProductManagement.css';
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 
 interface Category {
   id: number;
@@ -30,25 +30,6 @@ const ProductManagement: React.FC = () => {
   const [currentProduct, setCurrentProduct] = useState<Partial<Product> & { initial_stock?: number; low_stock_threshold?: number }>({});
   const [isEditing, setIsEditing] = useState(false);
 
-  const getAuthToken = async () => {
-    if (localStorage.getItem('rajasuvai_dev_admin') === 'true') return 'DEV_ADMIN_TOKEN';
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  };
-
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
-    const token = await getAuthToken();
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    return fetch(`${baseUrl}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      }
-    });
-  };
-
   useEffect(() => {
     fetchInitialData();
   }, []);
@@ -56,13 +37,13 @@ const ProductManagement: React.FC = () => {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [prodRes, catRes] = await Promise.all([
-        apiFetch('/api/admin/products'),
-        apiFetch('/api/admin/categories')
+      const [productsData, categoriesData] = await Promise.all([
+        api.get('/api/admin/products'),
+        api.get('/api/admin/categories')
       ]);
       
-      if (prodRes.ok) setProducts(await prodRes.json());
-      if (catRes.ok) setCategories(await catRes.json());
+      if (productsData) setProducts(productsData);
+      if (categoriesData) setCategories(categoriesData);
     } catch (err) {
       console.error('Fetch error:', err);
     } finally {
@@ -76,7 +57,6 @@ const ProductManagement: React.FC = () => {
     
     try {
       const endpoint = isEditing ? `/api/admin/products/${currentProduct.id}` : '/api/admin/products';
-      const method = isEditing ? 'PUT' : 'POST';
       
       const payload = {
         ...currentProduct,
@@ -84,14 +64,12 @@ const ProductManagement: React.FC = () => {
         low_stock_threshold: currentProduct.inventory?.low_stock_threshold || currentProduct.low_stock_threshold
       };
 
-      const response = await apiFetch(endpoint, {
-        method,
-        body: JSON.stringify(payload)
-      });
+      const resData = isEditing 
+        ? await api.put(endpoint, payload)
+        : await api.post(endpoint, payload);
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to save product');
+      if (resData.error) {
+        throw new Error(resData.error || 'Failed to save product');
       }
 
       setIsModalOpen(false);
@@ -109,9 +87,9 @@ const ProductManagement: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     
     try {
-      const response = await apiFetch(`/api/admin/products/${id}`, { method: 'DELETE' });
-      if (response.ok) fetchInitialData();
-      else throw new Error('Delete failed');
+      const resData = await api.delete(`/api/admin/products/${id}`);
+      if (!resData.error) fetchInitialData();
+      else throw new Error(resData.error || 'Delete failed');
     } catch (err: any) {
       alert(err.message);
     }

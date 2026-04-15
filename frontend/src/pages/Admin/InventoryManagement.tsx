@@ -7,7 +7,7 @@ import {
   History
 } from 'lucide-react';
 import './ProductManagement.css'; 
-import { supabase } from '../../supabaseClient';
+import { api } from '../../services/api';
 
 interface InventoryItem {
   id: number;
@@ -26,19 +26,6 @@ const InventoryManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const getAuthToken = async () => {
-    if (localStorage.getItem('rajasuvai_dev_admin') === 'true') return 'DEV_ADMIN_TOKEN';
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  };
-
-  const apiFetch = async (endpoint: string) => {
-    const token = await getAuthToken();
-    const headers = { 'Authorization': `Bearer ${token}` };
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-    return fetch(`${baseUrl}${endpoint}`, { headers });
-  };
-
   useEffect(() => {
     fetchInventory();
   }, []);
@@ -46,8 +33,8 @@ const InventoryManagement: React.FC = () => {
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/api/admin/inventory');
-      if (res.ok) setInventory(await res.json());
+      const data = await api.get('/api/admin/inventory');
+      if (data) setInventory(data);
     } catch (err) {
       console.error(err);
     } finally {
