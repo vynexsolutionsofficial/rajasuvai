@@ -397,3 +397,41 @@
     padding: 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .checkout-page-container { padding: 90px 12px 60px; }
+
+  .checkout-main-card { padding: 16px; border-radius: 16px; }
+
+  .checkout-title { font-size: 0.95rem; letter-spacing: 0.08em; }
+
+  .checkout-badge-row {
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .payment-method-item { padding: 14px 12px; gap: 10px; }
+
+  .method-label { font-size: 0.88rem; }
+
+  .upi-app-pill {
+    padding: 8px 10px;
+    min-height: 38px;
+  }
+
+  .btn-pay-secure {
+    padding: 15px;
+    font-size: 0.88rem;
+  }
+
+  .checkout-trust-footer { flex-direction: column; gap: 10px; }
+}
+
+@media (max-width: 375px) {
+  .checkout-page-container { padding: 80px 10px 50px; }
+  .checkout-main-card { padding: 14px; }
+  .payment-method-item { padding: 12px 10px; }
+  .method-label { font-size: 0.83rem; }
+}

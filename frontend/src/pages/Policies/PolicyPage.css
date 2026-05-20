@@ -80,3 +80,20 @@
   .policy-header h1 { font-size: 1.6rem; }
   .policy-content h2 { font-size: 1.1rem; }
 }
+
+@media (max-width: 480px) {
+  .policy-page { padding: 80px 12px 48px; }
+  .policy-container { padding: 20px 16px; border-radius: 14px; }
+  .policy-header h1 { font-size: clamp(1.3rem, 5vw, 1.6rem); }
+  .policy-content { font-size: 0.9rem; line-height: 1.75; }
+  .policy-content h2 { font-size: 1rem; margin: 24px 0 10px; }
+  .policy-content h3 { font-size: 0.9rem; }
+  .policy-header { margin-bottom: 24px; }
+}
+
+@media (max-width: 375px) {
+  .policy-page { padding: 76px 10px 40px; }
+  .policy-container { padding: 16px 14px; }
+  .policy-header h1 { font-size: 1.2rem; }
+  .policy-content { font-size: 0.85rem; }
+}

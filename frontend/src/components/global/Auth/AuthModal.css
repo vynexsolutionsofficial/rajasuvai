@@ -393,5 +393,48 @@
   .form-grid { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 480px) {
+  .auth-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .auth-modal-content {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 18px 32px;
+    max-height: 92dvh;
+    animation: slideUpSheet 0.32s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  /* Drag handle visual cue */
+  .auth-modal-content::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: #E7E5E4;
+    border-radius: 100px;
+    margin: 0 auto 20px;
+  }
+
+  .auth-modal-header h2 { font-size: 1.25rem; }
+
+  .auth-tabs button { padding: 9px; font-size: 0.85rem; }
+
+  .auth-method-btn { padding: 12px 14px; }
+}
+
+@media (max-width: 375px) {
+  .auth-modal-content { padding: 20px 14px 28px; }
+  .auth-modal-header h2 { font-size: 1.15rem; }
+}
+
+@keyframes slideUpSheet {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }

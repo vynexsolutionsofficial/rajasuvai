@@ -1038,3 +1038,59 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 480px) {
+  .pd-page { padding-top: 80px; padding-bottom: 40px; }
+
+  .pd-grid { padding: 0 12px; gap: 16px; }
+
+  .pd-info { padding: 18px 16px; }
+
+  .pd-title {
+    font-size: clamp(1.35rem, 5vw, 1.6rem);
+  }
+
+  .pd-price { font-size: 1.4rem; }
+
+  .pd-qty button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .pd-btn-cart,
+  .pd-btn-buy {
+    height: 46px;
+    font-size: 0.84rem;
+  }
+
+  .pd-thumb {
+    width: 56px;
+    height: 56px;
+  }
+
+  .pd-tabs-section,
+  .pd-reviews-section {
+    padding: 0 12px 20px;
+  }
+
+  .pd-tab-content { padding: 20px 16px; }
+
+  .pd-tab { padding: 14px 14px; font-size: 0.82rem; }
+
+  .pd-breadcrumb { padding: 0 12px; font-size: 0.78rem; }
+
+  /* Nutrition table: horizontal scroll on phones */
+  .pd-nutrition { overflow-x: auto; }
+  .pd-nutrition-table { min-width: 320px; }
+
+  .pd-overall-rating { padding: 12px 14px; gap: 10px; }
+  .pd-big-rating { font-size: 2.2rem; }
+}
+
+@media (max-width: 375px) {
+  .pd-info { padding: 14px 12px; }
+  .pd-title { font-size: 1.25rem; }
+  .pd-price { font-size: 1.25rem; }
+  .pd-weight-btn { padding: 6px 12px; font-size: 0.78rem; }
+  .pd-reviews-inner { padding: 20px 16px; }
+}

@@ -959,3 +959,44 @@
     padding: 24px 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .profile-page { padding: 70px 0 40px; }
+
+  .profile-container { padding: 12px; gap: 16px; }
+
+  .profile-section { padding: 16px; }
+
+  .profile-mobile-tab {
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    min-height: 38px;
+  }
+
+  .order-card-professional { padding: 16px; }
+
+  .order-professional-header { flex-wrap: wrap; gap: 8px; }
+
+  .order-professional-footer { gap: 8px; }
+
+  .btn-action-prof { padding: 8px 14px; font-size: 0.72rem; }
+
+  .address-grid { grid-template-columns: 1fr; }
+
+  .address-modal,
+  .support-modal {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .modal-actions { flex-direction: column; }
+
+  .modal-actions button { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 375px) {
+  .profile-container { padding: 10px; }
+  .profile-section { padding: 14px 12px; }
+  .section-header h2 { font-size: 1.05rem; }
+  .order-id-mono { font-size: 0.78rem; }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { SlidersHorizontal, X } from 'lucide-react';
 import ShopProductGrid from './ShopProductGrid';
 import './Shop.css';
 
@@ -41,16 +42,30 @@ const Shop: React.FC = () => {
     setTotalItems(total);
   }, []);
 
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
     <div className="shop-page">
+      {/* Mobile filter backdrop */}
+      <div
+        className={`shop-sidebar-backdrop${filtersOpen ? ' open' : ''}`}
+        onClick={() => setFiltersOpen(false)}
+      />
       <main className="shop-container">
 
         {/* ── Sidebar ── */}
-        <aside className="shop-sidebar">
+        <aside className={`shop-sidebar${filtersOpen ? ' open' : ''}`}>
+          {/* Close button (mobile only) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px 16px', borderBottom: '1px solid #F5F4F2', marginBottom: '16px' }}>
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 700, fontSize: '0.95rem', color: '#1C1917' }}>Filters</span>
+            <button onClick={() => setFiltersOpen(false)} style={{ background: '#F5F4F2', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', color: '#57534E' }}>
+              <X size={16} />
+            </button>
+          </div>
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Categories</h3>
             <div className="shop-filter-list">
@@ -122,6 +137,10 @@ const Shop: React.FC = () => {
               </p>
             </div>
             <div className="header-actions">
+              <button className="shop-filter-toggle" onClick={() => setFiltersOpen(true)}>
+                <SlidersHorizontal size={15} />
+                Filters
+              </button>
               <select
                 className="shop-sort"
                 value={activeSort}

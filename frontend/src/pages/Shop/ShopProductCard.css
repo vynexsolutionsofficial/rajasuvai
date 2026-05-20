@@ -176,3 +176,31 @@
   transform: none;
   box-shadow: none;
 }
+
+@media (max-width: 480px) {
+  .sp-add-btn {
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 0.74rem;
+  }
+
+  .sp-content {
+    padding: 10px 12px 12px;
+  }
+
+  .sp-name {
+    font-size: 0.85rem;
+  }
+
+  .sp-price {
+    font-size: 0.92rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .sp-add-btn {
+    padding: 7px 8px;
+    font-size: 0.7rem;
+    gap: 2px;
+  }
+}

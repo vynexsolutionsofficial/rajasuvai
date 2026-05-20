@@ -199,3 +199,20 @@
   .oc-card { padding: 28px 18px; }
   .oc-actions { flex-direction: column; }
 }
+
+@media (max-width: 480px) {
+  .oc-page { padding: 28px 12px; }
+  .oc-card { padding: 24px 14px; border-radius: 18px; }
+  .oc-title { font-size: clamp(1.3rem, 5vw, 1.6rem); }
+  .oc-subtitle { font-size: 0.84rem; }
+  .oc-delivery-banner { font-size: 0.82rem; padding: 10px 14px; gap: 8px; }
+  .oc-section { padding: 16px; }
+  .oc-btn-primary,
+  .oc-btn-secondary { padding: 12px 14px; font-size: 0.84rem; }
+}
+
+@media (max-width: 375px) {
+  .oc-card { padding: 20px 12px; }
+  .oc-title { font-size: 1.2rem; }
+  .oc-section { padding: 13px 11px; }
+}
