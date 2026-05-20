@@ -35,15 +35,6 @@ export const authenticateToken = async (req, res, next) => {
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  // --- DEVELOPMENT BYPASS ---
-  if (token === 'DEV_ADMIN_TOKEN') {
-    const devEmail = 'admin@rajasuvai.com';
-    req.user = { email: devEmail, role: 'admin' };
-    // Ensure the dev admin has a client record
-    await ensureClientRecord(devEmail, 'Dev Admin');
-    return next();
-  }
-
   try {
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
@@ -63,11 +54,6 @@ export const authenticateToken = async (req, res, next) => {
 export const requireAdmin = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  // --- DEVELOPMENT BYPASS ---
-  if (req.user.email === 'admin@rajasuvai.com' && req.user.role === 'admin') {
-    return next();
   }
 
   try {

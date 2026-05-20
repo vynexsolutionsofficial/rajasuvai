@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  Users, 
-  ShoppingBag, 
+import {
+  TrendingUp,
+  Users,
+  ShoppingBag,
   DollarSign,
   ArrowUpRight,
   AlertTriangle,
   Award,
   Package,
   History,
-  Activity
+  Activity,
+  Calendar
 } from 'lucide-react';
 import { 
   XAxis, 
@@ -23,7 +24,13 @@ import {
 import './Dashboard.css';
 import { api } from '../../services/api';
 
+const toInputDate = (d: Date) => d.toISOString().split('T')[0];
+
 const Dashboard: React.FC = () => {
+  const now = new Date();
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const [dateFrom, setDateFrom] = useState(toInputDate(firstOfMonth));
+  const [dateTo, setDateTo] = useState(toInputDate(now));
   const [stats, setStats] = useState({
     totalSales: 0,
     totalOrders: 0,
@@ -40,8 +47,9 @@ const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
+        const params = dateFrom && dateTo ? `?from=${dateFrom}&to=${dateTo}` : '';
         const [sData, aData] = await Promise.all([
-          api.get('/api/admin/dashboard-stats'),
+          api.get(`/api/admin/dashboard-stats${params}`),
           api.get('/api/admin/analytics')
         ]);
         
@@ -68,7 +76,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [dateFrom, dateTo]);
 
   if (loading) {
     return (
@@ -81,6 +89,31 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-content">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.5rem', padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px' }}>
+        <Calendar size={16} style={{ color: 'rgba(255,255,255,0.5)' }} />
+        <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Revenue Period</span>
+        <input
+          type="date"
+          value={dateFrom}
+          max={dateTo}
+          onChange={e => setDateFrom(e.target.value)}
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', colorScheme: 'dark' }}
+        />
+        <span style={{ color: 'rgba(255,255,255,0.3)' }}>→</span>
+        <input
+          type="date"
+          value={dateTo}
+          min={dateFrom}
+          onChange={e => setDateTo(e.target.value)}
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', padding: '6px 12px', borderRadius: '8px', fontSize: '0.85rem', colorScheme: 'dark' }}
+        />
+        <button
+          onClick={() => { const t = new Date(); setDateFrom(toInputDate(new Date(t.getFullYear(), t.getMonth(), 1))); setDateTo(toInputDate(t)); }}
+          style={{ background: 'none', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.5)', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.8rem' }}
+        >
+          This Month
+        </button>
+      </div>
       <div className="dashboard-grid">
         <div className="metric-card">
           <div className="metric-icon" style={{ background: 'rgba(74, 222, 128, 0.2)', color: '#4ade80' }}>

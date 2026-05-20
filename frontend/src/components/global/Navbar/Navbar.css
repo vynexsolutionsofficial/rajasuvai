@@ -12,9 +12,52 @@
 }
 
 .site-header.scrolled .navbar {
-  background: var(--color-brand-orange);
-  height: 65px; /* Slimmer header on scroll */
-  box-shadow: var(--shadow-glow);
+  background: #ffffff;
+  height: 65px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  border-bottom: 1px solid #E7E5E4;
+}
+
+/* Scrolled state — nav links go dark */
+.site-header.scrolled .nav-links a {
+  color: #1C1917;
+}
+
+.site-header.scrolled .nav-links a:hover,
+.site-header.scrolled .nav-links a.active {
+  color: #E8600A;
+  opacity: 1;
+}
+
+/* Scrolled state — icon buttons go dark */
+.site-header.scrolled .navbar-icon-btn {
+  color: #1C1917;
+}
+
+/* Scrolled state — search form light bg */
+.site-header.scrolled .navbar-search-form {
+  background: #F5F4F2;
+  border-color: #E7E5E4;
+}
+
+.site-header.scrolled .navbar-search-input {
+  color: #1C1917;
+}
+
+.site-header.scrolled .navbar-search-input::placeholder {
+  color: #A8A29E;
+}
+
+/* Scrolled state — SHOP NOW becomes orange */
+.site-header.scrolled .shop-now-btn {
+  background: #E8600A;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(232, 96, 10, 0.25);
+}
+
+.site-header.scrolled .shop-now-btn:hover {
+  background: #C94E00;
+  box-shadow: 0 6px 20px rgba(232, 96, 10, 0.35);
 }
 
 /* Bokeh effect simulation - Removing for true transparency */
@@ -38,8 +81,8 @@
 }
 
 .logo-image {
-  height: 130px;
-  width: 280px;
+  height: 70px;
+  width: auto;
   object-fit: contain;
   transition: transform 0.3s ease;
 }
@@ -90,6 +133,9 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   transition: opacity 0.3s;
   position: relative;
 }
@@ -102,8 +148,8 @@
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #fff;
-  color: #ff7b00;
+  background: #E8600A;
+  color: #fff;
   font-size: 0.65rem;
   font-weight: 700;
   width: 18px;
@@ -143,11 +189,45 @@
   .nav-subtext {
     letter-spacing: 4px;
   }
+  .navbar-logo {
+    min-width: auto;
+  }
 }
 
 @media (max-width: 992px) {
   .navbar-center {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+  }
+  .logo-image {
+    height: 56px;
+  }
+  .navbar-right {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 12px;
+  }
+  .logo-image {
+    height: 48px;
+  }
+  .navbar-right {
+    gap: 8px;
+  }
+  .cat-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 0.6rem;
+    top: 4px;
+    right: 4px;
   }
 }
 
@@ -172,6 +252,13 @@
 /* Base styles for Mobile Menu elements (hidden on desktop) */
 .mobile-menu-btn {
   display: none;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .mobile-menu-header {
@@ -227,5 +314,55 @@
   .nav-links.mobile-open a {
     font-size: 1.5rem;
     font-weight: 800;
+    padding: 14px 20px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mobile-menu-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-links.mobile-open {
+    gap: 18px;
+  }
+  .nav-links.mobile-open a {
+    font-size: 1.25rem;
+  }
+}
+
+/* Search form in navbar */
+.navbar-search-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 24px;
+  padding: 4px 8px;
+  backdrop-filter: blur(8px);
+}
+
+.navbar-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.9rem;
+  width: 180px;
+  padding: 4px 8px;
+}
+
+.navbar-search-input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+@media (max-width: 768px) {
+  .navbar-search-form {
+    display: none;
   }
 }

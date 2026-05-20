@@ -1,88 +1,151 @@
-import React from 'react';
-import { Phone, Clock, MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { Phone, Clock, MapPin, Send } from 'lucide-react';
+import { api } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 import './SupportPage.css';
 
 const SupportPage: React.FC = () => {
+  const { showToast } = useToast();
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [sending, setSending] = useState(false);
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.message) return;
+    setSending(true);
+    try {
+      await api.post('/api/support', {
+        subject: form.subject || 'General Enquiry',
+        message: `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
+      });
+      showToast('Message sent! We\'ll respond within 2 hours.', 'success');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch {
+      showToast('Failed to send message. Please try again.', 'error');
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
-    <div className="support-page-wrapper">
-      <div className="support-header">
-        <h1 className="support-logo">RAJA SUVAI</h1>
+    <div className="contact-page">
+
+      {/* ── Hero ── */}
+      <section className="contact-hero">
+        <h1 className="contact-hero-title">Get in Touch</h1>
+        <p className="contact-hero-sub">
+          Questions about our spices, orders, or anything else? We're here to help.
+        </p>
+      </section>
+
+      {/* ── Info Strip ── */}
+      <div className="contact-info-strip">
+        <div className="contact-info-card">
+          <div className="contact-info-icon-box">
+            <Phone size={20} />
+          </div>
+          <span className="contact-info-label">Phone</span>
+          <span className="contact-info-value">+91 99999 00000</span>
+        </div>
+        <div className="contact-info-card">
+          <div className="contact-info-icon-box">
+            <Clock size={20} />
+          </div>
+          <span className="contact-info-label">Hours</span>
+          <span className="contact-info-value">Mon–Sat, 9am – 7pm</span>
+        </div>
+        <div className="contact-info-card">
+          <div className="contact-info-icon-box">
+            <MapPin size={20} />
+          </div>
+          <span className="contact-info-label">Location</span>
+          <span className="contact-info-value">Coimbatore, Tamil Nadu</span>
+        </div>
       </div>
 
-      <div className="support-info-bar">
-        <div className="info-item">
-          <Phone size={18} className="info-icon" />
-          <span>+91 99999 00000</span>
-        </div>
-        <div className="info-item">
-          <Clock size={18} className="info-icon" />
-          <span>Mon-Sat, 9am - 7pm</span>
-        </div>
-        <div className="info-item">
-          <MapPin size={18} className="info-icon" />
-          <span>Coimbatore, TN</span>
-        </div>
-        <div className="info-item">
-          <MapPin size={18} className="info-icon" />
-          <span>Tamil Nadu, India</span>
-        </div>
-      </div>
+      {/* ── Body ── */}
+      <div className="contact-body container">
 
-      <div className="support-content container">
-        <div className="support-split-layout">
-          {/* Left Side: Form Card */}
-          <div className="support-form-card">
-            <div className="form-header">
-              <div className="header-line"></div>
-              <span className="header-label">LET'S <span>CONNECT</span></span>
-              <div className="header-line"></div>
+        {/* Form Card */}
+        <div className="contact-form-card">
+          <h2 className="contact-form-title">Send us a Message</h2>
+          <p className="contact-form-sub">Fill out the form and we'll respond within 2 hours.</p>
+
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <div className="contact-form-row">
+              <div className="contact-input-group">
+                <label className="contact-label">Full Name</label>
+                <input
+                  type="text"
+                  className="contact-input"
+                  placeholder="Your name"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="contact-input-group">
+                <label className="contact-label">Email Address</label>
+                <input
+                  type="email"
+                  className="contact-input"
+                  placeholder="your@email.com"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })}
+                  required
+                />
+              </div>
             </div>
-            
-            <h2 className="form-title">DROP US A <span>NOTE.</span></h2>
-            <p className="form-subtitle">Fill out the form below and we'll respond within 2 hours.</p>
 
-            <form className="contact-form">
-              <div className="form-group">
-                <input type="text" placeholder="Full Name" className="form-input" />
-              </div>
-              
-              <div className="form-group email-group">
-                <input type="email" placeholder="Email Address" className="form-input" />
-                <span className="input-hint">your@email.com</span>
-              </div>
-              
-              <div className="form-group textarea-group">
-                <label className="input-label">Your Message</label>
-                <textarea placeholder="Tell us what you're looking for..." className="form-textarea"></textarea>
-              </div>
-
-              <button type="submit" className="btn-send-message">
-                SEND MESSAGE <span className="btn-arrow">→</span>
-              </button>
-            </form>
-
-            <div className="form-footer">
-              <div className="header-line"></div>
-              <span className="footer-label">FOLLOW US</span>
-              <div className="header-line"></div>
+            <div className="contact-input-group">
+              <label className="contact-label">Subject</label>
+              <input
+                type="text"
+                className="contact-input"
+                placeholder="e.g. Order enquiry, Product question..."
+                value={form.subject}
+                onChange={e => setForm({ ...form, subject: e.target.value })}
+              />
             </div>
-            
-            <div className="support-socials">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="social-icon"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+
+            <div className="contact-input-group">
+              <label className="contact-label">Message</label>
+              <textarea
+                className="contact-textarea"
+                placeholder="Tell us how we can help..."
+                value={form.message}
+                onChange={e => setForm({ ...form, message: e.target.value })}
+                required
+              />
+            </div>
+
+            <button type="submit" className="contact-submit-btn" disabled={sending}>
+              <Send size={16} />
+              {sending ? 'Sending...' : 'Send Message'}
+            </button>
+          </form>
+
+          <div className="contact-social-row">
+            <span className="contact-social-label">Follow us</span>
+            <div className="contact-socials">
+              <a href="#" className="social-btn" aria-label="Instagram">IG</a>
+              <a href="#" className="social-btn" aria-label="Facebook">FB</a>
             </div>
           </div>
+        </div>
 
-          {/* Right Side: Decorative Image */}
-          <div className="support-visual-card">
-            <img 
-              src="/products/garam_masala.png" 
-              alt="Artisan Spices" 
-              className="spice-image"
-            />
+        {/* Visual Card */}
+        <div className="contact-visual-card">
+          <img
+            src="/products/garam_masala.png"
+            alt="Artisan Spices"
+            className="contact-visual-img"
+          />
+          <div className="contact-visual-overlay">
+            <p className="contact-visual-quote">"Crafted with tradition,<br />delivered with care."</p>
           </div>
         </div>
+
       </div>
     </div>
   );

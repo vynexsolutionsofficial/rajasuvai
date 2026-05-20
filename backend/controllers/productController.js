@@ -1,22 +1,37 @@
 import { supabase } from '../supabaseClient.js';
 
 export const getProducts = async (req, res) => {
-  const { category, priceMin, priceMax, offset, limit } = req.query;
-  
+  const { category, priceMin, priceMax, offset, limit, search, sort } = req.query;
+
   try {
-    let query = supabase.from('products').select('*', { count: 'exact' });
+    let query = supabase.from('products').select('*, inventory(quantity)', { count: 'exact' });
 
     if (category && category !== 'All') {
       query = query.eq('category', category);
     }
 
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
+    }
+
     if (priceMin) query = query.gte('price_numeric', priceMin);
     if (priceMax) query = query.lte('price_numeric', priceMax);
+
+    // Sorting
+    if (sort === 'price_asc') {
+      query = query.order('price_numeric', { ascending: true });
+    } else if (sort === 'price_desc') {
+      query = query.order('price_numeric', { ascending: false });
+    } else if (sort === 'newest') {
+      query = query.order('created_at', { ascending: false });
+    } else {
+      query = query.order('id', { ascending: true });
+    }
 
     if (offset && limit) {
       const from = parseInt(offset);
       const to = from + parseInt(limit) - 1;
-      query = query.range(from, to).order('id', { ascending: true });
+      query = query.range(from, to);
     }
 
     const { data, count, error } = await query;

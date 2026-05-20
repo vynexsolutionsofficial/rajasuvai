@@ -102,7 +102,7 @@ const Profile: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!profile) return;
 
@@ -132,6 +132,37 @@ const Profile: React.FC = () => {
   const [supportCategory, setSupportCategory] = useState('Delivery');
   const [supportSuccess, setSupportSuccess] = useState(false);
 
+  const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const handleChangePassword = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'Passwords do not match.' });
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordMsg({ type: 'error', text: 'Password must be at least 6 characters.' });
+      return;
+    }
+    setSavingPassword(true);
+    setPasswordMsg(null);
+    try {
+      const res = await api.patch('/api/users/password', { newPassword: passwordForm.newPassword });
+      if (res.error) {
+        setPasswordMsg({ type: 'error', text: res.error });
+      } else {
+        setPasswordMsg({ type: 'success', text: 'Password updated successfully!' });
+        setPasswordForm({ newPassword: '', confirmPassword: '' });
+      }
+    } catch {
+      setPasswordMsg({ type: 'error', text: 'Connection error. Please try again.' });
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
   // Address Modal State
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -160,7 +191,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleAddressSubmit = async (e: React.FormEvent) => {
+  const handleAddressSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -201,19 +232,34 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleSupportSubmit = (e: React.FormEvent) => {
+  const handleSupportSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    setSupportSuccess(true);
-    setTimeout(() => {
-      setSupportSuccess(false);
-      setSelectedOrderForSupport(null);
-      setSupportMessage('');
-    }, 2500);
+    setSaving(true);
+    try {
+      const res = await api.post('/api/support', {
+        order_id: selectedOrderForSupport?.id?.toString(),
+        subject: `${supportCategory} Issue - Order #${selectedOrderForSupport?.id}`,
+        message: supportMessage
+      });
+      if (!res.error) {
+        setSupportSuccess(true);
+        setTimeout(() => {
+          setSupportSuccess(false);
+          setSelectedOrderForSupport(null);
+          setSupportMessage('');
+        }, 3000);
+      } else {
+        setMessage({ type: 'error', text: 'Failed to submit ticket. Please try again.' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Connection error.' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('rajasuvai_dev_admin');
     window.location.href = '/';
   };
 
@@ -357,34 +403,70 @@ const Profile: React.FC = () => {
                 {orders.length === 0 ? (
                   <div className="no-data-placeholder">
                     <Package size={48} />
-                    <p>No orders found yet.</p>
+                    <p>No orders yet. Start shopping!</p>
                   </div>
                 ) : (
-                  orders.map((order) => (
-                    <div key={order.id} className="order-card-professional">
-                      <div className="order-professional-header">
-                        <div className="order-id-mono">Order: #{order.id.toString().padStart(6, '0')}</div>
-                        <div className="status-badge-minimal" data-status={order.status}>{order.status}</div>
-                      </div>
-                      <div className="order-items-minimalist">
-                        {order.order_items.map((item) => (
-                          <div key={item.id} className="item-row">
-                            <span className="item-qty-tag">{item.quantity}×</span>
-                            <span className="item-name-prof">{item.products.name}</span>
-                            <span className="item-price-prof">₹{item.unit_price}</span>
+                  orders.map((order) => {
+                    const STATUS_STEPS = ['Pending', 'Packed', 'Shipped', 'Delivered'];
+                    const currentIdx = STATUS_STEPS.findIndex(s => s.toLowerCase() === order.status.toLowerCase());
+                    const isCancelled = order.status.toLowerCase() === 'cancelled';
+                    const canCancel = ['pending', 'packed', 'pending_payment', 'paid'].includes(order.status.toLowerCase());
+
+                    const handleCancel = async () => {
+                      if (!confirm('Cancel this order?')) return;
+                      const res = await api.post(`/api/orders/${order.id}/cancel`, {});
+                      if (!res.error) {
+                        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'Cancelled' } : o));
+                        setMessage({ type: 'success', text: 'Order cancelled successfully.' });
+                      } else {
+                        setMessage({ type: 'error', text: res.error || 'Failed to cancel order.' });
+                      }
+                    };
+
+                    return (
+                      <div key={order.id} className="order-card-professional">
+                        <div className="order-professional-header">
+                          <div className="order-id-mono">Order #{order.id.toString().padStart(6, '0')}</div>
+                          <div className={`status-badge-minimal ${isCancelled ? 'cancelled' : ''}`} data-status={order.status}>
+                            {order.status}
                           </div>
-                        ))}
-                      </div>
-                      <div className="order-professional-footer">
-                        <div className="timestamp-prof">{new Date(order.created_at).toLocaleDateString()}</div>
-                        <div className="total-prof">Total: ₹{order.total_price}</div>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                          <button className="btn-action-prof outline" onClick={() => setSelectedOrderForSupport(order)}>Need Help?</button>
-                          <button className="btn-action-prof">View Details</button>
+                        </div>
+
+                        {/* Status stepper */}
+                        {!isCancelled && (
+                          <div className="order-status-stepper">
+                            {STATUS_STEPS.map((step, i) => (
+                              <div key={step} className={`stepper-step ${i <= currentIdx ? 'done' : ''} ${i === currentIdx ? 'current' : ''}`}>
+                                <div className="stepper-dot" />
+                                <span className="stepper-label">{step}</span>
+                                {i < STATUS_STEPS.length - 1 && <div className="stepper-line" />}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="order-items-minimalist">
+                          {order.order_items.map((item) => (
+                            <div key={item.id} className="item-row">
+                              <span className="item-qty-tag">{item.quantity}×</span>
+                              <span className="item-name-prof">{item.products.name}</span>
+                              <span className="item-price-prof">₹{item.unit_price}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="order-professional-footer">
+                          <div className="timestamp-prof">{new Date(order.created_at).toLocaleDateString('en-IN')}</div>
+                          <div className="total-prof">Total: ₹{order.total_price}</div>
+                          <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            {canCancel && (
+                              <button className="btn-action-prof cancel" onClick={handleCancel}>Cancel</button>
+                            )}
+                            <button className="btn-action-prof outline" onClick={() => setSelectedOrderForSupport(order)}>Need Help?</button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -430,22 +512,42 @@ const Profile: React.FC = () => {
                 <h2>Security</h2>
                 <p>Update your password and keep your account safe.</p>
               </div>
-              <form className="profile-form">
-                <div className="input-group">
-                  <label>Current Password</label>
-                  <input type="password" placeholder="••••••••" />
+              {passwordMsg && (
+                <div className={`profile-message ${passwordMsg.type}`}>
+                  {passwordMsg.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                  {passwordMsg.text}
                 </div>
-                <div className="form-grid" style={{ marginTop: '1.5rem' }}>
+              )}
+              <form className="profile-form" onSubmit={handleChangePassword}>
+                <div className="form-grid">
                   <div className="input-group">
                     <label>New Password</label>
-                    <input type="password" />
+                    <input
+                      type="password"
+                      placeholder="At least 6 characters"
+                      value={passwordForm.newPassword}
+                      onChange={(e) => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
+                      required
+                      minLength={6}
+                    />
                   </div>
                   <div className="input-group">
                     <label>Confirm New Password</label>
-                    <input type="password" />
+                    <input
+                      type="password"
+                      placeholder="Repeat new password"
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                      required
+                    />
                   </div>
                 </div>
-                <button className="btn-save" title="Password Update" style={{ marginTop: '2rem' }}>Change Password</button>
+                <div className="form-actions">
+                  <button type="submit" className="btn-save" disabled={savingPassword} style={{ marginTop: '2rem' }}>
+                    {savingPassword ? <Loader2 className="animate-spin" size={18} /> : <Shield size={18} />}
+                    Change Password
+                  </button>
+                </div>
               </form>
             </div>
           )}

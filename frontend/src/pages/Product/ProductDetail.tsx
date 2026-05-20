@@ -10,6 +10,7 @@ interface Product {
   price: string;
   category: string;
   image: string;
+  inventory?: { quantity: number }[];
 }
 
 // Static review data
@@ -172,7 +173,13 @@ const ProductDetail: React.FC = () => {
             </div>
             <span className="pd-rating-num">{rating}</span>
             <span className="pd-review-count">(124 Reviews)</span>
-            <span className="pd-in-stock">✓ In Stock</span>
+            {(() => {
+              const qty = product.inventory?.[0]?.quantity ?? null;
+              if (qty === null) return null;
+              return qty > 0
+                ? <span className="pd-in-stock">✓ In Stock ({qty} left)</span>
+                : <span className="pd-out-of-stock">✕ Out of Stock</span>;
+            })()}
           </div>
 
           {/* Price */}

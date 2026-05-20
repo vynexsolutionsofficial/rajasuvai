@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, CheckCircle, ArrowLeft, Loader2, Pencil, Trash2, X } from 'lucide-react';
 import { api } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 import './AddressSelection.css';
 
 interface Address {
@@ -19,6 +20,7 @@ interface Address {
 
 const AddressSelection: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,7 +87,7 @@ const AddressSelection: React.FC = () => {
       setShowModal(false);
     } catch (err) {
       console.error('Error saving address:', err);
-      alert('Failed to save address. Please try again.');
+      showToast('Failed to save address. Please try again.', 'error');
     } finally {
       setSaving(false);
     }

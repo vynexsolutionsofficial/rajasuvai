@@ -10,9 +10,7 @@ const UserProtectedRoute: React.FC = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      const isDevAdmin = localStorage.getItem('rajasuvai_dev_admin') === 'true';
-      
-      setIsAuthenticated(!!user || isDevAdmin);
+      setIsAuthenticated(!!user);
       setLoading(false);
     };
 

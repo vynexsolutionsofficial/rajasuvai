@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Eye, 
-  CheckCircle, 
-  Truck, 
-  Clock, 
-  Search, 
-  X, 
+import {
+  Eye,
+  CheckCircle,
+  Truck,
+  Clock,
+  Search,
+  X,
   Loader2,
   Calendar,
   User,
@@ -13,10 +13,35 @@ import {
   Mail,
   Package,
   MapPin,
-  AlertCircle
+  AlertCircle,
+  Download,
+  CheckSquare
 } from 'lucide-react';
-import './ProductManagement.css'; 
+import './ProductManagement.css';
 import { api } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
+
+const exportToCsv = (filename: string, rows: Record<string, any>[]) => {
+  if (rows.length === 0) return;
+  const headers = Object.keys(rows[0]);
+  const escape = (v: any) => {
+    const s = v == null ? '' : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const csv = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => escape(r[h])).join(','))
+  ].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+const ORDER_STATUSES = ['Pending', 'Packed', 'Shipped', 'Delivered', 'Cancelled'] as const;
 
 interface OrderItem {
   id: number;
@@ -42,12 +67,16 @@ interface Order {
 }
 
 const OrderManagement: React.FC = () => {
+  const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [bulkSaving, setBulkSaving] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -88,17 +117,67 @@ const OrderManagement: React.FC = () => {
           fetchOrderDetails(id);
         }
       } else {
-        alert(data.error || 'Failed to update status');
+        showToast(data.error || 'Failed to update status', 'error');
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const filteredOrders = orders.filter(o => 
-    o.clients?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    o.id.toString().includes(searchQuery)
-  );
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch =
+      o.clients?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.id.toString().includes(searchQuery);
+    const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const toggleSelected = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredOrders.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredOrders.map(o => o.id)));
+    }
+  };
+
+  const bulkUpdateStatus = async (status: string) => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Update ${selectedIds.size} order(s) to "${status}"?`)) return;
+    setBulkSaving(true);
+    try {
+      const res = await api.post('/api/admin/orders/bulk-status', { ids: Array.from(selectedIds), status });
+      showToast(`Updated ${res.updated} order(s)`, 'success');
+      setSelectedIds(new Set());
+      fetchOrders();
+    } catch (err: any) {
+      showToast(err.message || 'Bulk update failed', 'error');
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
+  const handleExportCsv = () => {
+    const rows = filteredOrders.map(o => ({
+      order_id: o.id,
+      customer: o.clients?.name || '',
+      email: o.clients?.email || '',
+      phone: o.clients?.phone || '',
+      status: o.status,
+      total: o.total_price,
+      created_at: new Date(o.created_at).toISOString()
+    }));
+    exportToCsv(`suvai-orders-${new Date().toISOString().split('T')[0]}.csv`, rows);
+    showToast(`Exported ${rows.length} orders`, 'success');
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -113,17 +192,47 @@ const OrderManagement: React.FC = () => {
 
   return (
     <div className="order-mgmt">
-      <div className="admin-toolbar">
-        <div style={{ position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'rgba(255,255,255,0.4)' }} />
-          <input 
-            type="text" 
-            placeholder="Search orders or customers..." 
+      <div className="admin-toolbar" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'rgba(255,255,255,0.4)' }} />
+            <input
+              type="text"
+              placeholder="Search orders or customers..."
+              className="search-input"
+              style={{ paddingLeft: '2.5rem', width: '280px' }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <select
             className="search-input"
-            style={{ paddingLeft: '2.5rem', width: '300px' }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            style={{ width: 'auto', minWidth: '140px' }}
+          >
+            <option value="all">All Statuses</option>
+            {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {selectedIds.size > 0 && (
+            <>
+              <select
+                className="search-input"
+                disabled={bulkSaving}
+                onChange={e => { if (e.target.value) bulkUpdateStatus(e.target.value); e.target.value = ''; }}
+                style={{ width: 'auto', minWidth: '180px' }}
+              >
+                <option value="">Bulk update ({selectedIds.size}) →</option>
+                {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </>
+          )}
+          <button className="btn-secondary" onClick={handleExportCsv} disabled={filteredOrders.length === 0}>
+            <Download size={16} style={{ marginRight: '0.4rem' }} />
+            Export CSV
+          </button>
         </div>
       </div>
 
@@ -137,6 +246,14 @@ const OrderManagement: React.FC = () => {
           <table className="admin-table">
             <thead>
               <tr>
+                <th style={{ width: '40px' }}>
+                  <input
+                    type="checkbox"
+                    checked={filteredOrders.length > 0 && selectedIds.size === filteredOrders.length}
+                    onChange={toggleSelectAll}
+                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                  />
+                </th>
                 <th>Order ID</th>
                 <th>Customer</th>
                 <th>Date</th>
@@ -147,7 +264,15 @@ const OrderManagement: React.FC = () => {
             </thead>
             <tbody>
               {filteredOrders.map((order) => (
-                <tr key={order.id}>
+                <tr key={order.id} style={{ background: selectedIds.has(order.id) ? 'rgba(249,168,38,0.05)' : undefined }}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(order.id)}
+                      onChange={() => toggleSelected(order.id)}
+                      style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                    />
+                  </td>
                   <td style={{ fontWeight: 600 }}>#{order.id}</td>
                   <td>
                     <div style={{ fontWeight: 500 }}>{order.clients?.name}</div>

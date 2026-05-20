@@ -59,7 +59,7 @@
 }
 
 .hero-badge {
-  font-size: 0.75rem;
+  font-size: clamp(0.62rem, 1.8vw, 0.75rem);
   font-weight: 800;
   letter-spacing: 5px;
   color: rgba(255,255,255,0.7);
@@ -68,7 +68,7 @@
 }
 
 .hero-title {
-  font-size: clamp(2rem, 6vw, 4.2rem);
+  font-size: clamp(1.85rem, 6.5vw, 4.2rem);
   line-height: 0.95;
   font-weight: 900;
   margin-bottom: 2rem;
@@ -96,9 +96,10 @@
 }
 
 .hero-description {
-  font-size: 1.1rem;
+  font-size: clamp(0.92rem, 2.5vw, 1.1rem);
   max-width: 580px;
   margin: 0 auto 3rem;
+  padding: 0 16px;
   line-height: 1.6;
   opacity: 0.9;
   letter-spacing: 0.3px;
@@ -163,7 +164,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--color-brand-orange);
+  background: #E8600A;
   color: #fff;
   display: flex;
   align-items: center;
@@ -197,18 +198,66 @@
 
 @media (max-width: 768px) {
   .hero-title {
-    font-size: 3.5rem;
     letter-spacing: -1px;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge {
+    letter-spacing: 3px;
+    margin-bottom: 1.4rem;
   }
   .hero-cta {
     flex-direction: column;
-    padding: 0 2rem;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    margin-bottom: 3rem;
   }
-  .btn-artisan {
+  .btn-artisan,
+  .btn-outline-white {
     width: 100%;
   }
   .plus-badge {
     position: relative;
     left: 0;
   }
+}
+
+@media (max-width: 480px) {
+  .hero-content {
+    top: 52%;
+    padding: 0 12px;
+  }
+  .hero-badge {
+    letter-spacing: 2.5px;
+    margin-bottom: 1.2rem;
+  }
+  .hero-title {
+    letter-spacing: -0.5px;
+  }
+  .hero-cta {
+    padding: 0 8px;
+    gap: 0.875rem;
+    margin-bottom: 2.25rem;
+  }
+  .btn-outline-white {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+  }
+  .chef-avatars img,
+  .plus-badge {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+    margin-left: -12px;
+  }
+  .plus-badge { font-size: 0.7rem; }
+  .star-rating { font-size: 1rem; letter-spacing: 3px; }
+  .endorsement-text p {
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+  }
+}
+
+@media (max-width: 375px) {
+  .hero-badge { letter-spacing: 2px; font-size: 0.6rem; }
+  .hero-description { font-size: 0.88rem; margin-bottom: 2rem; }
 }

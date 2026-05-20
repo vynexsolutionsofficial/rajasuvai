@@ -1,12 +1,14 @@
-/* Our Story Page Styles */
+/* =========================================================
+   Our Story Page
+   ========================================================= */
+
 .our-story-page {
-  padding-top: 80px; /* Accounts for fixed navbar */
-  background-color: transparent;
-  color: var(--color-text);
+  padding-top: 80px;
+  background: #FAFAF8;
   min-height: 100vh;
 }
 
-/* Hero Section */
+/* ── Hero ── */
 .story-hero {
   position: relative;
   height: 400px;
@@ -20,11 +22,8 @@
 
 .story-hero-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(10, 15, 20, 0.7); /* Dark overlay */
+  inset: 0;
+  background: rgba(28, 25, 23, 0.7);
 }
 
 .story-hero-content {
@@ -32,150 +31,156 @@
   z-index: 1;
   color: #fff;
   max-width: 800px;
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
 .story-hero-content h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 3.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 800;
-  margin-bottom: 20px;
+  margin: 0 0 16px 0;
   letter-spacing: -1px;
 }
 
 .story-hero-content p {
-  font-size: 1.25rem;
-  opacity: 0.9;
-  line-height: 1.5;
+  font-size: 1.1rem;
+  opacity: 0.85;
+  line-height: 1.6;
+  margin: 0;
 }
 
-/* Introduction Section */
+/* ── Intro Section ── */
 .story-intro {
-  padding: 80px 20px;
+  padding: 80px 24px;
   text-align: center;
+  background: #FAFAF8;
 }
 
 .intro-text {
-  max-width: 800px;
+  max-width: 780px;
   margin: 0 auto;
 }
 
 .intro-text h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
-  margin-bottom: 30px;
-  color: #1a1510;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0 0 24px 0;
+  color: #1C1917;
+  letter-spacing: -0.3px;
 }
 
 .intro-text p {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   line-height: 1.8;
-  color: #555;
+  color: #57534E;
+  margin: 0;
 }
 
-/* Pillars Section */
+/* ── Pillars Section ── */
 .story-pillars {
-  padding: 40px 20px 100px;
+  padding: 0 24px 80px;
 }
 
 .pillar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .pillar-card {
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
-  padding: 40px 30px;
+  border: 1px solid #E7E5E4;
+  border-radius: 20px;
+  padding: 36px 28px;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.18s ease;
 }
 
 .pillar-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  border-color: #ff7b00;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  border-color: #E8600A;
 }
 
 .pillar-icon {
   width: 64px;
   height: 64px;
   margin: 0 auto 20px;
-  background: rgba(255, 123, 0, 0.1);
-  color: #ff7b00;
-  border-radius: 50%;
+  background: #FFF7ED;
+  color: #E8600A;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .pillar-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-  color: #1a1510;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #1C1917;
 }
 
 .pillar-card p {
-  font-size: 1rem;
+  font-size: 0.9rem;
   line-height: 1.6;
-  color: #666;
+  color: #57534E;
+  margin: 0;
 }
 
-/* CTA Section */
+/* ── CTA Section ── */
 .story-cta {
-  background: #1a1510;
-  padding: 80px 20px;
+  background: #1C1917;
+  padding: 80px 24px;
   text-align: center;
 }
 
 .story-cta h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
-  margin-bottom: 15px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin: 0 0 14px 0;
   color: #fff;
+  letter-spacing: -0.3px;
 }
 
 .story-cta p {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 30px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 28px 0;
+  line-height: 1.6;
 }
 
 .story-btn {
   display: inline-block;
-  background: #ff7b00;
+  background: #E8600A;
   color: #fff;
-  padding: 15px 40px;
-  border-radius: 30px;
-  font-size: 1.1rem;
+  padding: 14px 40px;
+  border-radius: 100px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background 0.18s ease, transform 0.15s ease;
 }
 
 .story-btn:hover {
-  background: #e66a00;
-  transform: scale(1.05);
+  background: #C94E00;
+  transform: translateY(-2px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .story-hero {
-    height: 300px;
-  }
-  
-  .story-hero-content h1 {
-    font-size: 2.5rem;
-  }
-  
+  .story-hero { height: 300px; }
+
+  .story-hero-content h1 { font-size: 2.2rem; }
+
   .intro-text h2,
-  .story-cta h2 {
-    font-size: 2rem;
-  }
-  
-  .pillar-card {
-    padding: 30px 20px;
-  }
+  .story-cta h2 { font-size: 1.8rem; }
+
+  .pillar-card { padding: 28px 20px; }
 }

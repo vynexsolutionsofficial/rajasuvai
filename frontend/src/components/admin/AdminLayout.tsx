@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  ClipboardList, 
-  Package, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  ClipboardList,
+  Package,
+  LogOut,
   User,
   Users,
   Tag,
   Settings,
   Bell,
-  Home
+  Home,
+  Menu,
+  X
 } from 'lucide-react';
 import './AdminLayout.css';
 import { supabase } from '../../supabaseClient';
@@ -20,27 +22,17 @@ const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [adminName, setAdminName] = useState('Admin');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     // ProtectedRoute already handles auth guard.
     // Here we just fetch the admin's display name.
     const fetchAdminName = async () => {
       try {
-        // --- DEVELOPMENT BYPASS ---
-        const isDevAdmin = localStorage.getItem('rajasuvai_dev_admin') === 'true';
-        if (isDevAdmin) {
-          const { data: profile } = await supabase
-            .from('clients')
-            .select('name')
-            .eq('email', 'admin@rajasuvai.com')
-            .maybeSingle();
-
-          if (profile?.name) {
-            setAdminName(profile.name);
-            return;
-          }
-        }
-
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
         
@@ -62,7 +54,6 @@ const AdminLayout: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    localStorage.removeItem('rajasuvai_dev_admin');
     await supabase.auth.signOut();
     navigate('/');
     window.location.reload();
@@ -80,17 +71,30 @@ const AdminLayout: React.FC = () => {
 
   return (
     <div className="admin-container">
-      <div className="admin-sidebar">
-        <div className="admin-logo">
-          <span>SUVAİ</span>
-          <span style={{ fontSize: '0.6rem', background: '#f9a826', color: '#000', padding: '2px 6px', borderRadius: '4px', verticalAlign: 'middle', WebkitTextFillColor: '#000' }}>ADMIN</span>
+      {drawerOpen && (
+        <div className="admin-drawer-backdrop" onClick={() => setDrawerOpen(false)} />
+      )}
+
+      <aside className={`admin-sidebar ${drawerOpen ? 'open' : ''}`}>
+        <div className="admin-sidebar-header">
+          <div className="admin-logo">
+            <span>SUVAİ</span>
+            <span className="admin-logo-tag">ADMIN</span>
+          </div>
+          <button
+            className="admin-drawer-close"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={22} />
+          </button>
         </div>
-        
+
         <nav className="admin-nav">
           {navItems.map((item) => (
-            <Link 
-              key={item.name} 
-              to={item.path} 
+            <Link
+              key={item.name}
+              to={item.path}
               className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
             >
               {item.icon}
@@ -98,35 +102,40 @@ const AdminLayout: React.FC = () => {
             </Link>
           ))}
         </nav>
-        
-        <Link 
-          to="/" 
-          className="admin-nav-item" 
-          style={{ marginTop: 'auto', marginBottom: '0.5rem' }}
-        >
+
+        <Link to="/" className="admin-nav-item admin-nav-foot">
           <Home size={20} />
           <span>Back to Site</span>
         </Link>
 
-        <button className="admin-nav-item" style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer' }} onClick={handleLogout}>
+        <button className="admin-nav-item admin-nav-foot" onClick={handleLogout}>
           <LogOut size={20} />
           <span>Logout</span>
         </button>
-      </div>
-      
+      </aside>
+
       <main className="admin-content">
         <header className="admin-header">
-          <h1>{navItems.find(i => i.path === location.pathname)?.name || 'Admin'}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <Bell size={20} style={{ color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }} />
+          <div className="admin-header-left">
+            <button
+              className="admin-hamburger"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={22} />
+            </button>
+            <h1>{navItems.find(i => i.path === location.pathname)?.name || 'Admin'}</h1>
+          </div>
+          <div className="admin-header-right">
+            <Bell size={20} className="admin-bell" />
             <div className="user-profile">
               <div className="user-avatar">{adminName.charAt(0)}</div>
-              <span>{adminName}</span>
+              <span className="user-profile-name">{adminName}</span>
               <User size={16} />
             </div>
           </div>
         </header>
-        
+
         <Outlet />
       </main>
     </div>

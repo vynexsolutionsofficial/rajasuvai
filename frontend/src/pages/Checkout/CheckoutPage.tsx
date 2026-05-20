@@ -3,12 +3,14 @@ import { useCart } from '../../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldCheck, Smartphone, CreditCard, Landmark } from 'lucide-react';
 import { api } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 import './checkout.css';
 
 const CheckoutPage: React.FC = () => {
-  const { cart, cartTotal } = useCart();
+  const { cart, cartTotal, clearCart } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
   const [selectedMethod, setSelectedMethod] = useState('upi');
   const [selectedSubMethod, setSelectedSubMethod] = useState('gpay');
   const [selectedBank, setSelectedBank] = useState('HDFC');
@@ -43,7 +45,7 @@ const CheckoutPage: React.FC = () => {
 
   const handlePayment = async () => {
     if (selectedMethod === 'upi' && selectedSubMethod === 'manual' && !manualUpiId) {
-      alert('Please enter your UPI ID');
+      showToast('Please enter your UPI ID', 'warning');
       return;
     }
 
@@ -51,7 +53,7 @@ const CheckoutPage: React.FC = () => {
       setLoading(true);
       const res = await loadRazorpayScript('https://checkout.razorpay.com/v1/checkout.js');
       if (!res) {
-        alert('Payment system offline. Please check your connection.');
+        showToast('Payment system offline. Please check your connection.', 'error');
         setLoading(false);
         return;
       }
@@ -62,7 +64,7 @@ const CheckoutPage: React.FC = () => {
       });
 
       if (!orderData.success || !orderData.razorOrder) {
-        alert(orderData.error || 'Failed to initialize payment.');
+        showToast(orderData.error || 'Failed to initialize payment.', 'error');
         setLoading(false);
         return;
       }
@@ -72,7 +74,7 @@ const CheckoutPage: React.FC = () => {
         amount: orderData.razorOrder.amount,
         currency: orderData.razorOrder.currency,
         name: 'Suvai Artisan Spices',
-        description: 'Elite Transaction',
+        description: 'Your order from Suvai',
         order_id: orderData.razorOrder.id,
         handler: async function (response: any) {
           const verifyData = await api.post('/api/payments/verify', {
@@ -84,10 +86,20 @@ const CheckoutPage: React.FC = () => {
           });
 
           if (verifyData.success) {
-            alert('Your order is successful! 🌿');
-            navigate('/profile');
+            clearCart();
+            navigate('/order-confirmation', {
+              state: {
+                orderId: orderData.dbOrderId,
+                items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: parseFloat(item.price) || 0 })),
+                subtotal: safeCartTotal,
+                shipping,
+                convenienceFee,
+                total: finalTotal
+              }
+            });
           } else {
-            alert('Verification failed. System handles this via Webhook.');
+            showToast('Payment completed. Confirmation via email shortly.', 'info');
+            navigate('/profile');
           }
         },
         modal: { ondismiss: () => setLoading(false) },
@@ -106,7 +118,7 @@ const CheckoutPage: React.FC = () => {
 
     } catch (err: any) {
       console.error('PAYMENT_ERROR:', err);
-      alert('Technical error occurred.');
+      showToast('A technical error occurred. Please try again.', 'error');
     } finally {
       setLoading(false);
     }

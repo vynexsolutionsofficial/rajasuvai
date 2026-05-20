@@ -6,25 +6,20 @@ let tokenCache: { token: string | null; expiry: number } = { token: null, expiry
 
 const getAuthToken = async () => {
   const now = Date.now();
-  // Return cached token if fresh (5 min cache)
   if (tokenCache.token && now < tokenCache.expiry) {
     return tokenCache.token;
   }
 
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token || null;
-  
-  // Cache for 5 minutes
   tokenCache = { token, expiry: now + 5 * 60 * 1000 };
+  return token;
+};
 
-  if (token) return token;
-  
-  // Development bypass
-  if (localStorage.getItem('rajasuvai_dev_admin') === 'true') {
-    return 'DEV_ADMIN_TOKEN';
-  }
-  
-  return null;
+const throwIfError = async (response: Response) => {
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || data.error || `Request failed: ${response.status}`);
+  return data;
 };
 
 export const api = {
@@ -32,64 +27,48 @@ export const api = {
     const token = await getAuthToken();
     const url = new URL(`${API_BASE_URL}${endpoint}`);
     Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-
     const response = await fetch(url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
-    return response.json();
+    return throwIfError(response);
   },
 
   async post(endpoint: string, body: any) {
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    return response.json();
+    return throwIfError(response);
   },
 
   async put(endpoint: string, body: any) {
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    return response.json();
+    return throwIfError(response);
   },
 
   async patch(endpoint: string, body: any) {
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    return response.json();
+    return throwIfError(response);
   },
 
   async delete(endpoint: string) {
     const token = await getAuthToken();
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
-    return response.json();
+    return throwIfError(response);
   }
 };

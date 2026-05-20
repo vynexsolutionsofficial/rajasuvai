@@ -3,11 +3,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { supabase } from './supabaseClient.js';
 import {
+  sendEmail,
   sendLoginEmail,
   sendOrderEmail,
-  sendOrderStatusEmail
+  sendOrderStatusEmail,
+  sendOTPEmail
 } from './emailService.js';
-// import { sendWhatsAppOTP } from './whatsappService.js';
+import { generateOTP, verifyOTP } from './otpService.js';
 // --- ROUTE IMPORTS ---
 import addressRoutes from './routes/addressRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
@@ -34,57 +36,58 @@ app.use('/api/cart', cartRoutes);
 
 // --- AUTHENTICATION ROUTES ---
 
-const otpStore = new Map(); // Mock OTP store: phone -> otp
+// Rate limit: max 5 OTP requests per IP per 15 minutes
+const otpRateLimit = new Map(); // ip -> { count, resetAt }
+
+const checkOtpRateLimit = (ip) => {
+  const now = Date.now();
+  const entry = otpRateLimit.get(ip);
+  if (!entry || now > entry.resetAt) {
+    otpRateLimit.set(ip, { count: 1, resetAt: now + 15 * 60 * 1000 });
+    return true;
+  }
+  if (entry.count >= 5) return false;
+  entry.count++;
+  return true;
+};
 
 app.post('/api/auth/send-otp', async (req, res) => {
-  const { phone, mode } = req.body; // mode: 'login' or 'signup'
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+  const ip = req.ip || req.connection.remoteAddress;
+  if (!checkOtpRateLimit(ip)) {
+    return res.status(429).json({ success: false, message: 'Too many OTP requests. Try again in 15 minutes.' });
+  }
 
   try {
-    // 1. Database Check based on Mode
-    const { data: user, error: checkError } = await supabase
-      .from('clients')
-      .select('id')
-      .eq('phone', phone)
-      .single();
-
-    if (mode === 'login') {
-      if (!user) {
-        return res.status(404).json({ success: false, message: 'No account found with this number' });
-      }
-    } else if (mode === 'signup') {
-      if (user) {
-        return res.status(400).json({ success: false, message: 'This number is already registered' });
-      }
-    }
-
-    // 2. Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore.set(phone, otp);
-    console.log(`[MOCK OTP] Generated for ${phone} (${mode}): ${otp}`);
-
-    // 3. Send via WhatsApp
-    const waResult = await sendWhatsAppOTP(phone, otp);
-
-    res.json({
-      success: true,
-      message: waResult.success ? 'OTP sent via WhatsApp' : 'OTP generated (Check terminal for mock)'
-    });
+    const otp = generateOTP(email);
+    console.log(`[OTP] Generated for ${email}: ${otp}`);
+    await sendOTPEmail(email, otp);
+    res.json({ success: true, message: 'OTP sent to your email' });
   } catch (error) {
-    console.error('OTP Error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error('OTP Send Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to send OTP' });
   }
 });
 
-app.post('/api/auth/verify-otp', (req, res) => {
-  const { phone, otp } = req.body;
-  const storedOtp = otpStore.get(phone);
+app.post('/api/auth/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP are required' });
 
-  if (storedOtp && storedOtp === otp) {
-    otpStore.delete(phone);
-    res.json({ success: true, message: 'OTP verified successfully' });
-  } else {
-    res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+  const valid = verifyOTP(email, otp);
+  if (!valid) {
+    return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
   }
+
+  // Check if user already exists in clients table
+  const { data: existingClient } = await supabase
+    .from('clients')
+    .select('id, name')
+    .ilike('email', email)
+    .maybeSingle();
+
+  res.json({ success: true, userExists: !!existingClient, message: 'OTP verified' });
 });
 
 app.get('/api/auth/check-phone/:phone', async (req, res) => {
@@ -191,11 +194,6 @@ app.get('/api/products', async (req, res) => {
 
 import { authenticateToken, requireAdmin } from './authMiddleware.js';
 
-// 1. Dashboard Stats
-app.get('/api/admin/dashboard-stats', authenticateToken, requireAdmin, async (req, res) => {
-  // ... existing implementation
-});
-
 // 2. Categories
 app.get('/api/admin/categories', authenticateToken, requireAdmin, async (req, res) => {
   const { data, error } = await supabase.from('categories').select('*').order('name');
@@ -294,16 +292,27 @@ app.patch('/api/admin/products/:id/stock', authenticateToken, requireAdmin, asyn
 
 app.get('/api/admin/dashboard-stats', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    // 1. Total Orders Count
-    const { count: orderCount } = await supabase.from('orders').select('*', { count: 'exact', head: true });
+    const { from, to } = req.query;
 
-    // 2. Total Revenue (Sum of sales)
-    const { data: salesData } = await supabase.from('sales').select('total_amount');
+    // 1. Total Orders Count + total products
+    let orderQuery = supabase.from('orders').select('*', { count: 'exact', head: true });
+    if (from) orderQuery = orderQuery.gte('created_at', from);
+    if (to) orderQuery = orderQuery.lte('created_at', to);
+    const { count: orderCount } = await orderQuery;
+
+    const { count: productCount } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true });
+
+    // 2. Total Revenue (date-filtered)
+    let salesQuery = supabase.from('sales').select('total_amount, created_at');
+    if (from) salesQuery = salesQuery.gte('created_at', from);
+    if (to) salesQuery = salesQuery.lte('created_at', to);
+    const { data: salesData } = await salesQuery;
     const totalRevenue = salesData?.reduce((sum, s) => sum + Number(s.total_amount), 0) || 0;
 
     // 3. Total Users (Customers)
     const { count: userCount } = await supabase
-      .from('clients')
       .from('clients')
       .select('*', { count: 'exact', head: true })
       .eq('role', 'customer');
@@ -319,12 +328,13 @@ app.get('/api/admin/dashboard-stats', authenticateToken, requireAdmin, async (re
     const { data: lowStock } = await supabase
       .from('inventory')
       .select('*, products(name)')
-      .lte('quantity', 10); // Using 10 as default threshold for now
+      .lte('quantity', 10);
 
     res.json({
       totalOrders: orderCount || 0,
       totalRevenue,
       totalUsers: userCount || 0,
+      totalProducts: productCount || 0,
       recentOrders: recentOrders || [],
       lowStock: lowStock || [],
       timestamp: new Date().toISOString()
@@ -511,24 +521,22 @@ app.put('/api/admin/inventory/:id', authenticateToken, requireAdmin, async (req,
 // 6. User Management
 app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    // Fetch all clients (excluding admins if desired, but here we fetch all)
     const { data: users, error: userErr } = await supabase
       .from('clients')
-      .select('id, name, email, phone, role, created_at')
+      .select('id, name, email, phone, role, is_active, created_at')
       .order('created_at', { ascending: false });
 
     if (userErr) throw userErr;
 
-    // Fetch order counts for each user
     const { data: orderCounts, error: countErr } = await supabase
       .from('orders')
       .select('client_id');
 
     if (countErr) throw countErr;
 
-    // Map order counts to users
     const userList = users.map(user => ({
       ...user,
+      is_active: user.is_active !== false,
       order_count: orderCounts.filter(o => o.client_id === user.id).length
     }));
 
@@ -536,6 +544,86 @@ app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) =>
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Helper: check if target user id is the calling admin themselves
+const isSelf = async (userId, callerEmail) => {
+  const { data } = await supabase
+    .from('clients')
+    .select('id')
+    .ilike('email', callerEmail)
+    .maybeSingle();
+  return data && data.id === parseInt(userId);
+};
+
+// 6a. Update user role (promote/demote)
+app.patch('/api/admin/users/:id/role', authenticateToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { role } = req.body;
+  if (!['admin', 'customer'].includes(role)) {
+    return res.status(400).json({ error: 'Role must be admin or customer' });
+  }
+  if (await isSelf(id, req.user.email)) {
+    return res.status(400).json({ error: 'You cannot change your own role' });
+  }
+  const { data, error } = await supabase
+    .from('clients')
+    .update({ role })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// 6b. Enable/disable user account
+app.patch('/api/admin/users/:id/status', authenticateToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { is_active } = req.body;
+  if (typeof is_active !== 'boolean') {
+    return res.status(400).json({ error: 'is_active must be a boolean' });
+  }
+  if (await isSelf(id, req.user.email)) {
+    return res.status(400).json({ error: 'You cannot disable your own account' });
+  }
+  const { data, error } = await supabase
+    .from('clients')
+    .update({ is_active })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// 6c. Fetch a single user's orders (admin view)
+app.get('/api/admin/users/:id/orders', authenticateToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, status, total_price, created_at, order_items(id, quantity, unit_price, products(name))')
+    .eq('client_id', id)
+    .order('created_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// 6d. Bulk order status update
+app.post('/api/admin/orders/bulk-status', authenticateToken, requireAdmin, async (req, res) => {
+  const { ids, status } = req.body;
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids must be a non-empty array' });
+  }
+  if (!['Pending', 'Packed', 'Shipped', 'Delivered', 'Cancelled'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ status })
+    .in('id', ids)
+    .select('id, status');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ updated: data.length, orders: data });
 });
 
 // 7. Coupon Management
@@ -573,6 +661,26 @@ app.get('/api/admin/payments', authenticateToken, requireAdmin, async (req, res)
 
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
+});
+
+// Admin Settings
+app.get('/api/admin/settings', authenticateToken, requireAdmin, async (req, res) => {
+  const { data, error } = await supabase.from('site_settings').select('*');
+  if (error) return res.status(500).json({ error: error.message });
+  const settings = {};
+  for (const row of data || []) settings[row.key] = row.value;
+  res.json(settings);
+});
+
+app.put('/api/admin/settings', authenticateToken, requireAdmin, async (req, res) => {
+  const entries = Object.entries(req.body).map(([key, value]) => ({
+    key,
+    value: String(value),
+    updated_at: new Date().toISOString()
+  }));
+  const { error } = await supabase.from('site_settings').upsert(entries, { onConflict: 'key' });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ message: 'Settings saved successfully' });
 });
 
 // 8. User Dashboard & Order History
@@ -636,6 +744,55 @@ app.patch('/api/users/profile', authenticateToken, async (req, res) => {
   }
 });
 
+app.patch('/api/users/password', authenticateToken, async (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+  try {
+    const { error } = await supabase.auth.admin.updateUserById(req.user.id, { password: newPassword });
+    if (error) throw error;
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/support', authenticateToken, async (req, res) => {
+  const { order_id, subject, message } = req.body;
+  if (!subject || !message) {
+    return res.status(400).json({ error: 'Subject and message are required' });
+  }
+  try {
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id')
+      .ilike('email', req.user.email)
+      .maybeSingle();
+
+    const { data: ticket, error } = await supabase
+      .from('support_tickets')
+      .insert([{ client_id: client?.id || null, order_id: order_id || null, subject, message }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Notify admin via email
+    if (process.env.GMAIL_USER) {
+      await sendEmail(
+        process.env.GMAIL_USER,
+        `Support Ticket #${ticket.id}: ${subject}`,
+        `<p><b>From:</b> ${req.user.email}</p><p><b>Order:</b> ${order_id || 'N/A'}</p><p><b>Subject:</b> ${subject}</p><p>${message}</p>`
+      );
+    }
+
+    res.json({ message: 'Support ticket submitted successfully', ticket });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/orders/my-orders', authenticateToken, async (req, res) => {
   try {
     const { data: client } = await supabase
@@ -658,6 +815,54 @@ app.get('/api/orders/my-orders', authenticateToken, async (req, res) => {
 
     if (error) throw error;
     res.json(orders || []);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/orders/:id/cancel', authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const { data: client } = await supabase
+      .from('clients')
+      .select('id')
+      .ilike('email', req.user.email)
+      .maybeSingle();
+
+    if (!client) return res.status(404).json({ error: 'User not found' });
+
+    const { data: order, error: fetchErr } = await supabase
+      .from('orders')
+      .select('*, order_items(product_id, quantity)')
+      .eq('id', id)
+      .eq('client_id', client.id)
+      .maybeSingle();
+
+    if (fetchErr || !order) return res.status(404).json({ error: 'Order not found' });
+
+    if (!['Pending', 'Packed', 'pending_payment', 'paid'].includes(order.status)) {
+      return res.status(400).json({ error: `Cannot cancel an order with status: ${order.status}` });
+    }
+
+    // Restore inventory for each item
+    for (const item of order.order_items) {
+      const { data: inv } = await supabase
+        .from('inventory')
+        .select('id, quantity')
+        .eq('product_id', item.product_id)
+        .maybeSingle();
+
+      if (inv) {
+        await supabase
+          .from('inventory')
+          .update({ quantity: inv.quantity + item.quantity })
+          .eq('id', inv.id);
+      }
+    }
+
+    await supabase.from('orders').update({ status: 'Cancelled' }).eq('id', id);
+
+    res.json({ message: 'Order cancelled successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -917,6 +1122,24 @@ app.post('/api/payments/verify', async (req, res) => {
   } catch (error) {
     console.error('[Razorpay] Verify Error:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// --- NEWSLETTER ---
+app.post('/api/newsletter', async (req, res) => {
+  const { email } = req.body;
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'Valid email is required' });
+  }
+  try {
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .upsert([{ email, subscribed_at: new Date().toISOString() }], { onConflict: 'email', ignoreDuplicates: true });
+    if (error) throw error;
+    res.json({ success: true, message: 'Subscribed successfully' });
+  } catch (error) {
+    console.error('Newsletter error:', error.message);
+    res.status(500).json({ error: 'Failed to subscribe' });
   }
 });
 

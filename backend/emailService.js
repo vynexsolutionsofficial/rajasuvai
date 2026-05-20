@@ -93,6 +93,23 @@ export const sendOrderEmail = (to, name, orderId, amount) => {
   return sendEmail(to, subject, html);
 };
 
+export const sendOTPEmail = (to, otp) => {
+  const subject = 'Your Rajasuvai Login OTP';
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 24px; border: 1px solid #eee; border-radius: 12px;">
+      <h2 style="color: #8B5A2B; text-align: center; margin-bottom: 8px;">Rajasuvai Spices</h2>
+      <p style="text-align:center; color:#666; margin-top:0;">Your one-time login code</p>
+      <div style="text-align: center; margin: 32px 0;">
+        <span style="font-size: 40px; font-weight: bold; letter-spacing: 12px; color: #1a1a1a; background: #f5f0e8; padding: 16px 24px; border-radius: 8px; display: inline-block;">${otp}</span>
+      </div>
+      <p style="text-align:center; color:#555;">This code expires in <strong>10 minutes</strong>. Do not share it with anyone.</p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 24px 0;" />
+      <p style="text-align: center; color: #999; font-size: 12px;">© 2026 Rajasuvai Spices. All rights reserved.</p>
+    </div>
+  `;
+  return sendEmail(to, subject, html);
+};
+
 export const sendOrderStatusEmail = (to, name, orderId, status) => {
   const subject = `Order Status Update: #${orderId}`;
   const html = `

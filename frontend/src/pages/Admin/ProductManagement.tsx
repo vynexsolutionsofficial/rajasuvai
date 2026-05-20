@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, X, Loader2, AlertTriangle, Package } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Edit2, Trash2, Search, X, Loader2, AlertTriangle, Package, Upload } from 'lucide-react';
 import './ProductManagement.css';
 import { api } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
+import { supabase } from '../../supabaseClient';
 
 interface Category {
   id: number;
@@ -22,6 +24,7 @@ interface Product {
 }
 
 const ProductManagement: React.FC = () => {
+  const { showToast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +32,35 @@ const ProductManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product> & { initial_stock?: number; low_stock_threshold?: number }>({});
   const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be under 5MB', 'error');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from('product-images').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(path);
+      setCurrentProduct(p => ({ ...p, image: publicUrl }));
+      showToast('Image uploaded', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Upload failed. Check that bucket "product-images" exists.', 'error');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     fetchInitialData();
@@ -77,7 +109,7 @@ const ProductManagement: React.FC = () => {
       setIsEditing(false);
       fetchInitialData();
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Operation failed', 'error');
     } finally {
       setLoading(false);
     }
@@ -91,7 +123,7 @@ const ProductManagement: React.FC = () => {
       if (!resData.error) fetchInitialData();
       else throw new Error(resData.error || 'Delete failed');
     } catch (err: any) {
-      alert(err.message);
+      showToast(err.message || 'Operation failed', 'error');
     }
   };
 
@@ -286,13 +318,44 @@ const ProductManagement: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label>Image URL</label>
-                <input 
-                  type="text" 
-                  value={currentProduct.image || ''} 
-                  required
-                  onChange={(e) => setCurrentProduct({...currentProduct, image: e.target.value})}
-                />
+                <label>Product Image</label>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                  {currentProduct.image && (
+                    <img
+                      src={currentProduct.image}
+                      alt="preview"
+                      style={{ width: '70px', height: '70px', borderRadius: '10px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
+                    />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <input
+                      type="text"
+                      placeholder="Paste image URL or upload below"
+                      value={currentProduct.image || ''}
+                      required
+                      onChange={(e) => setCurrentProduct({...currentProduct, image: e.target.value})}
+                    />
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                      />
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}
+                      >
+                        {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                        &nbsp;{uploading ? 'Uploading…' : 'Upload Image'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="form-group">
                 <label>Description</label>

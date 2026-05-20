@@ -9,22 +9,6 @@ const ProtectedRoute: React.FC = () => {
 
   const checkAuth = async () => {
     try {
-      // --- DEVELOPMENT BYPASS ---
-      const isDevAdmin = localStorage.getItem('rajasuvai_dev_admin') === 'true';
-      if (isDevAdmin) {
-        const { data: profile } = await supabase
-          .from('clients')
-          .select('role')
-          .eq('email', 'admin@rajasuvai.com')
-          .maybeSingle();
-
-        if (profile?.role === 'admin') {
-          setIsAdmin(true);
-          setLoading(false);
-          return;
-        }
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         setIsAdmin(false);

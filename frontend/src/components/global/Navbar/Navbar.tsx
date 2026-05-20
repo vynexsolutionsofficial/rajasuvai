@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, User, ShieldCheck, Menu, X } from 'lucide-react';
 import { useCart } from '../../../context/CartContext';
 import { supabase } from '../../../supabaseClient';
@@ -9,33 +9,25 @@ import './Navbar.css';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { cartCount } = useCart();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      // --- DEVELOPMENT BYPASS ---
-      const isDevAdmin = localStorage.getItem('rajasuvai_dev_admin') === 'true';
-      if (isDevAdmin) {
-        const { data: profile } = await supabase
-          .from('clients')
-          .select('role')
-          .eq('email', 'admin@rajasuvai.com')
-          .maybeSingle();
-        
-        if (profile?.role === 'admin') {
-          setIsAdmin(true);
-          return;
-        }
-      }
+    if (showSearch) searchInputRef.current?.focus();
+  }, [showSearch]);
 
+  useEffect(() => {
+    const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
@@ -43,7 +35,6 @@ const Navbar: React.FC = () => {
           .select('role')
           .eq('email', user.email)
           .maybeSingle();
-        
         setIsAdmin(profile?.role === 'admin');
       } else {
         setIsAdmin(false);
@@ -51,23 +42,27 @@ const Navbar: React.FC = () => {
     };
 
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAuth();
-    });
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => checkAuth());
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleSearch = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      navigate(`/shop?search=${encodeURIComponent(q)}`);
+      setShowSearch(false);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* Left: Logo Section */}
         <Link to="/" className="navbar-logo">
           <img src={logo} alt="Rajasuvai Logo" className="logo-image" />
         </Link>
 
-        {/* Center: Navigation */}
         <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           <div className="mobile-menu-header">
             <span className="mobile-menu-title">Menu</span>
@@ -80,8 +75,8 @@ const Navbar: React.FC = () => {
           <Link to="/story" className={location.pathname === '/story' ? 'active' : ''}>OUR STORY</Link>
           <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>CONTACT</Link>
           {isAdmin && (
-            <Link 
-              to="/admin" 
+            <Link
+              to="/admin"
               className={location.pathname.startsWith('/admin') ? 'active admin-link' : 'admin-link'}
               style={{ color: '#f9a826', fontWeight: 'bold' }}
             >
@@ -90,22 +85,39 @@ const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* Right: Icons & Shop Now */}
         <div className="navbar-right">
           <button className="navbar-icon-btn mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu size={24} />
           </button>
-          
-          <button className="navbar-icon-btn">
-            <Search size={22} />
-          </button>
-          
-          <button 
+
+          {showSearch ? (
+            <form onSubmit={handleSearch} className="navbar-search-form">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="navbar-search-input"
+              />
+              <button type="submit" className="navbar-icon-btn">
+                <Search size={18} />
+              </button>
+              <button type="button" className="navbar-icon-btn" onClick={() => { setShowSearch(false); setSearchQuery(''); }}>
+                <X size={18} />
+              </button>
+            </form>
+          ) : (
+            <button className="navbar-icon-btn" onClick={() => setShowSearch(true)} aria-label="Search">
+              <Search size={22} />
+            </button>
+          )}
+
+          <button
             className={`navbar-icon-btn profile-btn ${showAuthModal ? 'active' : ''}`}
             onClick={async () => {
               const { data: { user } } = await supabase.auth.getUser();
-              const isDevAdmin = localStorage.getItem('rajasuvai_dev_admin') === 'true';
-              if (user || isDevAdmin) {
+              if (user) {
                 window.location.href = '/profile';
               } else {
                 setShowAuthModal(true);

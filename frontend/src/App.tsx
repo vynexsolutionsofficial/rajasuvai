@@ -31,6 +31,9 @@ import Settings from './pages/Admin/Settings';
 
 import Profile from './pages/Profile/Profile';
 import UserProtectedRoute from './components/admin/UserProtectedRoute';
+import OrderConfirmation from './pages/OrderConfirmation/OrderConfirmation';
+import WhatsAppButton from './components/global/WhatsAppButton/WhatsAppButton';
+import CartSyncNotifier from './components/CartSyncNotifier';
 function App() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -69,6 +72,7 @@ function App() {
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/contact" element={<SupportPage />} />
           <Route path="/story" element={<OurStory />} />
           
@@ -101,6 +105,8 @@ function App() {
       </main>
 
       {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <WhatsAppButton />}
+      <CartSyncNotifier />
     </div>
   );
 }

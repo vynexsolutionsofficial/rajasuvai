@@ -14,17 +14,21 @@ interface Product {
 interface ShopProductGridProps {
   category: string;
   priceRange?: [number, number | null];
+  sort?: string;
+  search?: string;
   currentPage: number;
   itemsPerPage: number;
   onTotalItems: (total: number) => void;
 }
 
-const ShopProductGrid: React.FC<ShopProductGridProps> = ({ 
-  category, 
+const ShopProductGrid: React.FC<ShopProductGridProps> = ({
+  category,
   priceRange,
-  currentPage, 
-  itemsPerPage, 
-  onTotalItems 
+  sort,
+  search,
+  currentPage,
+  itemsPerPage,
+  onTotalItems
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,11 +37,14 @@ const ShopProductGrid: React.FC<ShopProductGridProps> = ({
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const params: any = {
+        const params: Record<string, any> = {
           category,
           offset: (currentPage - 1) * itemsPerPage,
           limit: itemsPerPage
         };
+
+        if (search) params.search = search;
+        if (sort) params.sort = sort;
 
         if (priceRange) {
           params.priceMin = priceRange[0];
@@ -57,12 +64,22 @@ const ShopProductGrid: React.FC<ShopProductGridProps> = ({
     };
 
     fetchProducts();
-  }, [category, currentPage, itemsPerPage, priceRange, onTotalItems]);
+  }, [category, currentPage, itemsPerPage, priceRange, sort, search, onTotalItems]);
 
   if (loading) {
     return (
       <div className="shop-grid-loading">
         <div className="spinner"></div>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="shop-empty-state">
+        <span style={{ fontSize: '3rem' }}>🔍</span>
+        <h3>No products found</h3>
+        <p>{search ? `No results for "${search}". Try a different search term.` : 'No products match the selected filters.'}</p>
       </div>
     );
   }

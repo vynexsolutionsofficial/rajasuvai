@@ -1,13 +1,23 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ShopProductGrid from './ShopProductGrid';
 import './Shop.css';
 
 const Shop: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
+
   const [activeCategory, setActiveCategory] = useState('All');
   const [activePriceRange, setActivePriceRange] = useState<[number, number | null] | undefined>(undefined);
+  const [activeSort, setActiveSort] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 12;
+
+  // Reset to page 1 when URL search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [urlSearch]);
 
   const categories = ['All', 'Spices', 'Masalas', 'Oils', 'Snacks'];
   const priceRanges: { label: string; value: [number, number | null] }[] = [
@@ -41,7 +51,6 @@ const Shop: React.FC = () => {
 
         {/* ── Sidebar ── */}
         <aside className="shop-sidebar">
-          {/* Categories */}
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Categories</h3>
             <div className="shop-filter-list">
@@ -60,7 +69,6 @@ const Shop: React.FC = () => {
             </div>
           </div>
 
-          {/* Price Range */}
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Price Range</h3>
             <div className="shop-filter-list">
@@ -83,7 +91,6 @@ const Shop: React.FC = () => {
             </div>
           </div>
 
-          {/* Customer Ratings */}
           <div className="shop-filter-group">
             <h3 className="shop-filter-title">Customer Ratings</h3>
             <div className="shop-filter-list">
@@ -92,13 +99,9 @@ const Shop: React.FC = () => {
                   <input type="checkbox" name="rating" />
                   <span className="shop-check-custom"></span>
                   <span className="shop-star-rating">
-                    {Array(5)
-                      .fill(0)
-                      .map((_, i) => (
-                        <span key={i} style={{ opacity: i < num ? 1 : 0.2 }}>
-                          ★
-                        </span>
-                      ))}
+                    {Array(5).fill(0).map((_, i) => (
+                      <span key={i} style={{ opacity: i < num ? 1 : 0.2 }}>★</span>
+                    ))}
                     <span style={{ color: '#888', marginLeft: '4px', fontSize: '12px' }}>& Up</span>
                   </span>
                 </label>
@@ -111,16 +114,23 @@ const Shop: React.FC = () => {
         <section className="shop-main">
           <header className="shop-header">
             <div className="shop-header-info">
-              <h1 className="shop-title">Our Products</h1>
+              <h1 className="shop-title">
+                {urlSearch ? `Search: "${urlSearch}"` : 'Our Products'}
+              </h1>
               <p className="item-stats">
                 Showing {startItem}–{endItem} of {totalItems} items
               </p>
             </div>
             <div className="header-actions">
-              <select className="shop-sort">
-                <option>Sort: Popularity</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
+              <select
+                className="shop-sort"
+                value={activeSort}
+                onChange={(e) => { setActiveSort(e.target.value); setCurrentPage(1); }}
+              >
+                <option value="">Sort: Default</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="newest">Newest First</option>
               </select>
             </div>
           </header>
@@ -128,6 +138,8 @@ const Shop: React.FC = () => {
           <ShopProductGrid
             category={activeCategory}
             priceRange={activePriceRange}
+            sort={activeSort}
+            search={urlSearch}
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
             onTotalItems={handleTotalItems}
@@ -145,10 +157,7 @@ const Shop: React.FC = () => {
                 </button>
               ))}
               {currentPage < totalPages && (
-                <button
-                  className="page-btn next"
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
-                >
+                <button className="page-btn next" onClick={() => setCurrentPage((prev) => prev + 1)}>
                   Next →
                 </button>
               )}
