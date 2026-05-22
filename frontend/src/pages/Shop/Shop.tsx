@@ -15,7 +15,7 @@ const Shop: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [categories, setCategories] = useState<string[]>(['All']);
-  const itemsPerPage = 12;
+  const itemsPerPage = 200; // show all products on one page
 
   // Fetch real categories from DB
   useEffect(() => {
