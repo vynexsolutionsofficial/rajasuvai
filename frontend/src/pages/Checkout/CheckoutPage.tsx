@@ -89,8 +89,8 @@ const CheckoutPage: React.FC = () => {
             clearCart();
             navigate('/order-confirmation', {
               state: {
-                orderId: orderData.dbOrderId,
-                items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: parseFloat(item.price) || 0 })),
+                orderId: String(orderData.dbOrderId),
+                items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: item.price || 0 })),
                 subtotal: safeCartTotal,
                 shipping,
                 convenienceFee,

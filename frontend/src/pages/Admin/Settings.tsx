@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Store, Save, CheckCircle, Loader2, Mail, Smartphone, MapPin, Package, Megaphone } from 'lucide-react';
+import { Store, Save, CheckCircle, Loader2, Mail, Smartphone, MapPin, Package, Megaphone } from 'lucide-react';
 import './ProductManagement.css';
 import { api } from '../../services/api';
 

@@ -14,8 +14,7 @@ import {
   Package,
   MapPin,
   AlertCircle,
-  Download,
-  CheckSquare
+  Download
 } from 'lucide-react';
 import './ProductManagement.css';
 import { api } from '../../services/api';

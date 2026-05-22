@@ -1,39 +1,41 @@
-// Vite 5+ syntax: use query + import instead of the removed `as: 'url'` option
-const images = import.meta.glob('../assets/**/*.{jpg,jpeg,png,svg,gif}', {
-  eager: true,
-  query: '?url',
-  import: 'default'
-}) as Record<string, string>;
+// import.meta.glob with { eager: true } returns module objects.
+// For image files, the default export is the resolved asset URL string.
+// This works in Vite 5, 6, 7, 8 — no deprecated `as: 'url'` or `query` needed.
+const modules = import.meta.glob('../assets/**/*.{jpg,jpeg,png,svg,gif}', {
+  eager: true
+}) as Record<string, { default: string }>;
+
+// Pre-build a flat map of lowercase key → URL for fast lookup
+const imageMap: Record<string, string> = {};
+for (const [key, mod] of Object.entries(modules)) {
+  if (mod?.default) {
+    imageMap[key.toLowerCase()] = mod.default;
+  }
+}
 
 export const getProductCoverImage = (folderName: string | undefined): string => {
-  if (!folderName) return '/products/turmeric.png';
+  if (!folderName) return '';
 
-  const folderLower = folderName.toLowerCase();
+  const folder = folderName.toLowerCase();
 
-  // Try to find the image containing '01' (cover photo)
-  let coverKey = Object.keys(images).find(key =>
-    key.toLowerCase().includes(`/${folderLower}/`) && key.toLowerCase().includes('01')
+  // Prefer the image that contains '01' (main cover shot)
+  const coverKey = Object.keys(imageMap).find(
+    k => k.includes(`/${folder}/`) && k.includes('01')
   );
+  if (coverKey) return imageMap[coverKey];
 
-  // If no '01' image, fallback to the first image found in that folder
-  if (!coverKey) {
-    coverKey = Object.keys(images).find(key =>
-      key.toLowerCase().includes(`/${folderLower}/`)
-    );
-  }
-
-  return coverKey ? images[coverKey] : '/products/turmeric.png';
+  // Fall back to any image in that folder
+  const anyKey = Object.keys(imageMap).find(k => k.includes(`/${folder}/`));
+  return anyKey ? imageMap[anyKey] : '';
 };
 
 export const getProductAllImages = (folderName: string | undefined): string[] => {
   if (!folderName) return [];
 
-  const folderLower = folderName.toLowerCase();
+  const folder = folderName.toLowerCase();
 
-  const found = Object.keys(images)
-    .filter(key => key.toLowerCase().includes(`/${folderLower}/`))
+  return Object.keys(imageMap)
+    .filter(k => k.includes(`/${folder}/`))
     .sort()
-    .map(key => images[key]);
-
-  return found.length > 0 ? found : [];
+    .map(k => imageMap[k]);
 };
