@@ -7,47 +7,56 @@ const TermsOfService: React.FC = () => {
       <div className="policy-container">
         <div className="policy-header">
           <h1>Terms of Service</h1>
-          <p className="last-updated">Last Updated: October 2023</p>
+          <p className="last-updated">Last Updated: May 2026</p>
         </div>
         
         <div className="policy-content">
-          <h2>1. Terms</h2>
+          <h2>1. Introduction</h2>
           <p>
-            By accessing the website at rajasuvai.com, you are agreeing to be bound by these terms of service, 
-            all applicable laws and regulations, and agree that you are responsible for compliance with any applicable local laws.
+            Welcome to Rajasuvai! These Terms of Service ("Terms") govern your use of the website rajasuvai.com operated by Rajasuvai Foods Pvt Ltd ("we", "our", or "us"). 
+            By accessing or using our website, purchasing our products, or registering an account, you agree to be bound by these Terms. 
+            If you do not agree with any part of these Terms, you must refrain from using our services.
           </p>
 
-          <h2>2. Use License</h2>
+          <h2>2. User Accounts</h2>
           <p>
-            Permission is granted to temporarily download one copy of the materials (information or software) on Rajasuvai's website for personal, non-commercial transitory viewing only. 
-            This is the grant of a license, not a transfer of title, and under this license you may not:
-          </p>
-          <ul>
-            <li>modify or copy the materials;</li>
-            <li>use the materials for any commercial purpose, or for any public display (commercial or non-commercial);</li>
-            <li>attempt to decompile or reverse engineer any software contained on the website;</li>
-            <li>remove any copyright or other proprietary notations from the materials; or</li>
-            <li>transfer the materials to another person or "mirror" the materials on any other server.</li>
-          </ul>
-
-          <h2>3. Disclaimer</h2>
-          <p>
-            The materials on Rajasuvai's website are provided on an 'as is' basis. Rajasuvai makes no warranties, expressed or implied, 
-            and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, 
-            fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+            When you create an account with us, you guarantee that the information you provide is accurate, complete, and current at all times. 
+            Inaccurate, incomplete, or obsolete information may result in the immediate termination of your account. 
+            You are responsible for maintaining the confidentiality of your account and password, including but not limited to the restriction of access to your computer and/or account.
           </p>
 
-          <h2>4. Limitations</h2>
+          <h2>3. Products and Pricing</h2>
           <p>
-            In no event shall Rajasuvai or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, 
-            or due to business interruption) arising out of the use or inability to use the materials on Rajasuvai's website.
+            We strive to ensure that all details, descriptions, and prices of products appearing on our website are accurate. 
+            However, errors may occur. If we discover an error in the price of any goods you have ordered, we will inform you of this as soon as possible and give you the option of reconfirming your order at the correct price or cancelling it.
+            All prices are inclusive of GST as applicable in India. Delivery costs will be charged in addition; such additional charges are clearly displayed where applicable and included in the 'Total Cost'.
           </p>
 
-          <h2>5. Revisions and Errata</h2>
+          <h2>4. Intellectual Property</h2>
           <p>
-            The materials appearing on the website could include technical, typographical, or photographic errors. 
-            Rajasuvai does not warrant that any of the materials on its website are accurate, complete or current. 
-            We may make changes to the materials contained on its website at any time without notice.
+            The website and its original content, features, and functionality are and will remain the exclusive property of Rajasuvai Foods Pvt Ltd and its licensors. 
+            The website is protected by copyright, trademark, and other laws of India. Our trademarks and trade dress may not be used in connection with any product or service without the prior written consent of Rajasuvai Foods Pvt Ltd.
+          </p>
+
+          <h2>5. Limitation of Liability</h2>
+          <p>
+            In no event shall Rajasuvai Foods Pvt Ltd, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, 
+            including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from (i) your access to or use of or inability to access or use the Service; 
+            (ii) any conduct or content of any third party on the Service; (iii) any content obtained from the Service; and (iv) unauthorized access, use or alteration of your transmissions or content, 
+            whether based on warranty, contract, tort (including negligence) or any other legal theory.
+          </p>
+
+          <h2>6. Governing Law & Jurisdiction</h2>
+          <p>
+            These Terms shall be governed and construed in accordance with the laws of India. 
+            Any disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts located in Chennai, Tamil Nadu.
+          </p>
+
+          <h2>7. Contact Us</h2>
+          <p>
+            If you have any questions about these Terms, please contact us at: <br/>
+            <strong>Email:</strong> support@rajasuvai.com <br/>
+            <strong>Address:</strong> Rajasuvai Foods Pvt Ltd, Chennai, Tamil Nadu, India.
           </p>
         </div>
       </div>
