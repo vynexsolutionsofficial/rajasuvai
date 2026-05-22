@@ -6,7 +6,7 @@ export const getProducts = async (req, res) => {
   try {
     let query = supabase
       .from('products')
-      .select('*, categories(name), inventory(quantity)', { count: 'exact' });
+      .select('*, inventory(quantity)', { count: 'exact' });
 
     // Filter by category via category_id (look up by name first)
     if (category && category !== 'All') {
