@@ -3,6 +3,7 @@ import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { getProductCoverImage } from '../../utils/imageLoader';
 import './ShopProductCard.css';
 
 interface ProductCardProps {
@@ -20,21 +21,6 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
   const [added, setAdded] = useState(false);
   const { id, name, price, image } = product;
 
-  const getProductImage = (img: string, productName: string) => {
-    const lowerName = productName.toLowerCase();
-    if (lowerName.includes('turmeric')) return '/products/turmeric.png';
-    if (lowerName.includes('garam')) return '/products/garam_masala.png';
-    if (lowerName.includes('coconut')) return '/products/coconut_oil.png';
-    if (lowerName.includes('cashew')) return '/products/cashews.png';
-    if (lowerName.includes('pepper')) return '/products/pepper.png';
-    if (lowerName.includes('saffron')) return '/products/saffron.png';
-    if (lowerName.includes('amla')) return '/products/amla_candy.png';
-    if (lowerName.includes('chilli') || lowerName.includes('chili')) return '/products/chilli.png';
-    if (lowerName.includes('ghee')) return '/products/ghee.png';
-    if (lowerName.includes('cardamom')) return '/products/cardamom.png';
-    return img;
-  };
-
   let badge: string | null = null;
   if (name.includes('Turmeric') || name.includes('Coconut')) badge = 'NEW';
   else if (name.includes('Chilli')) badge = 'HOT';
@@ -50,7 +36,7 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
       <div className="sp-image-wrap">
         {badge && <span className="sp-badge">{badge}</span>}
         <img
-          src={getProductImage(image, name)}
+          src={getProductCoverImage(image)}
           alt={name}
           className="sp-image"
         />

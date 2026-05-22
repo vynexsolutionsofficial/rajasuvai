@@ -3,7 +3,7 @@ import { X, ChevronRight, Mail } from 'lucide-react';
 import { supabase } from '../../../supabaseClient';
 import './AuthModal.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 interface AuthModalProps {
   onClose: () => void;

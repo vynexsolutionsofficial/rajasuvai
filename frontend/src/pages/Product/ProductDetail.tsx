@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useCart } from '../../context/CartContext';
+import { getProductAllImages } from '../../utils/imageLoader';
 import './ProductDetail.css';
 
 interface Product {
@@ -36,26 +37,7 @@ const getDescription = (name: string) => {
   return `Experience the authentic taste of tradition with our premium ${name}. Carefully sourced and beautifully crafted to bring out the richest flavors and essential aromas. Perfect for culinary enthusiasts and health-conscious individuals alike.`;
 };
 
-// Get all images for a product (slideshow)
-const getProductImages = (name: string): string[] => {
-  const n = name.toLowerCase();
-  const imgs: Record<string, string[]> = {
-    turmeric: ['/products/turmeric.png', '/products/garam_masala.png', '/products/saffron.png'],
-    chilli: ['/products/chilli.png', '/products/pepper.png', '/products/garam_masala.png'],
-    pepper: ['/products/pepper.png', '/products/chilli.png', '/products/cardamom.png'],
-    garam: ['/products/garam_masala.png', '/products/turmeric.png', '/products/cardamom.png'],
-    cardamom: ['/products/cardamom.png', '/products/saffron.png', '/products/garam_masala.png'],
-    saffron: ['/products/saffron.png', '/products/cardamom.png', '/products/turmeric.png'],
-    ghee: ['/products/ghee.png', '/products/coconut_oil.png', '/products/cashews.png'],
-    coconut: ['/products/coconut_oil.png', '/products/ghee.png', '/products/cashews.png'],
-    cashew: ['/products/cashews.png', '/products/amla_candy.png', '/products/ghee.png'],
-    amla: ['/products/amla_candy.png', '/products/cashews.png', '/products/coconut_oil.png'],
-  };
-  for (const [key, val] of Object.entries(imgs)) {
-    if (n.includes(key)) return val;
-  }
-  return ['/products/turmeric.png'];
-};
+// Dynamic image loading is handled by getProductAllImages
 
 const WEIGHT_OPTIONS = ['50g', '100g', '250g', '500g', '1kg'];
 
@@ -105,7 +87,7 @@ const ProductDetail: React.FC = () => {
     </div>
   );
 
-  const images = getProductImages(product.name);
+  const images = getProductAllImages(product.image);
   const description = getDescription(product.name);
   const rating = 4.8;
   const numPrice = parseFloat(product.price.replace(/[^0-9.]/g, ''));

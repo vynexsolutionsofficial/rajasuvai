@@ -1,6 +1,5 @@
 import { supabase } from '../supabaseClient';
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 let tokenCache: { token: string | null; expiry: number } = { token: null, expiry: 0 };
 

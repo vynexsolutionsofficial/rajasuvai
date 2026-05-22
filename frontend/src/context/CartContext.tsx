@@ -20,6 +20,8 @@ interface CartContextType {
   cartTotal: number;
   cartCount: number;
   loading: boolean;
+  syncMessage: string | null;
+  clearSyncMessage: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,30 +30,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
-  // Initial Sync and Auth Listener
   useEffect(() => {
-    // 1. Initial Auth Check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-         fetchCartFromDB();
+        fetchCartFromDB();
       } else {
-         const local = localStorage.getItem('rajasuvai_cart');
-         if (local) setCart(JSON.parse(local));
-         setLoading(false);
+        const local = localStorage.getItem('rajasuvai_cart');
+        if (local) setCart(JSON.parse(local));
+        setLoading(false);
       }
     });
 
-    // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const newUser = session?.user ?? null;
-      
       if (!user && newUser) {
-        // User just logged in - Merge guest cart
         syncGuestCart();
       } else if (user && !newUser) {
-        // User just logged out - Reset to empty (or local storage if preferred)
         setCart([]);
         localStorage.removeItem('rajasuvai_cart');
       }
@@ -78,24 +75,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const local = localStorage.getItem('rajasuvai_cart');
       const items = local ? JSON.parse(local) : [];
-      
+
       if (items.length > 0) {
         await api.post('/api/cart/sync', { items });
         localStorage.removeItem('rajasuvai_cart');
+        setSyncMessage(`${items.length} item${items.length !== 1 ? 's' : ''} synced to your cart!`);
       }
-      
-      // Refresh state from DB after merge
+
       const finalCart = await api.get('/api/cart');
       setCart(finalCart);
     } catch (err) {
-       console.error('Cart sync failed:', err);
+      console.error('Cart sync failed:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const addToCart = async (product: any, qty: number = 1) => {
-    const numericPrice = typeof product.price === 'string' 
+    const numericPrice = typeof product.price === 'string'
       ? parseFloat(product.price.replace(/[^0-9.]/g, ''))
       : product.price;
 
@@ -136,7 +133,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateQuantity = async (productId: number, quantity: number) => {
     if (quantity < 1) return;
-    
     if (user) {
       await api.put('/api/cart', { product_id: productId, quantity });
       await fetchCartFromDB();
@@ -157,11 +153,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const clearSyncMessage = () => setSyncMessage(null);
+
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, loading }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount, loading, syncMessage, clearSyncMessage }}>
       {children}
     </CartContext.Provider>
   );
