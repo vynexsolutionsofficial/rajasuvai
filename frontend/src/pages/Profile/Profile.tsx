@@ -279,9 +279,10 @@ const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="profile-loading">
-        <Loader2 className="animate-spin" size={40} />
-        <p>Loading your ecosystem...</p>
+      <div className="profile-loading" style={{ flexDirection: 'column', textAlign: 'center', padding: '100px 20px', color: '#57534E' }}>
+        <Loader2 className="animate-spin" size={40} style={{ margin: '0 auto 20px', color: '#E8600A' }} />
+        <h3 style={{ margin: '0 0 10px', color: '#1C1917' }}>Waking up our secure servers... ☕</h3>
+        <p style={{ margin: 0 }}>Fetching your profile and order details. This might take up to a minute if our servers were asleep.</p>
       </div>
     );
   }
