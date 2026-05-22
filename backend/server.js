@@ -135,7 +135,7 @@ app.post('/api/auth/register', async (req, res) => {
       .from('clients')
       .select('id, email, phone')
       .or(`email.eq.${email},phone.eq.${phone}`)
-      .single();
+      .maybeSingle();
 
     if (existingUser) {
       return res.status(400).json({

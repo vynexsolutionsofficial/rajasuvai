@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
   const { cartCount } = useCart();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,12 +29,13 @@ const Navbar: React.FC = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
+      if (currentUser) {
         const { data: profile } = await supabase
           .from('clients')
           .select('role')
-          .eq('email', user.email)
+          .eq('email', currentUser.email)
           .maybeSingle();
         setIsAdmin(profile?.role === 'admin');
       } else {
@@ -116,8 +118,8 @@ const Navbar: React.FC = () => {
 
           <button
             className={`navbar-icon-btn profile-btn ${showAuthModal ? 'active' : ''}`}
-            onClick={async () => {
-              const { data: { user } } = await supabase.auth.getUser();
+            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+            onClick={() => {
               if (user) {
                 window.location.href = '/profile';
               } else {
@@ -126,6 +128,7 @@ const Navbar: React.FC = () => {
             }}
           >
             <User size={22} />
+            {!user && <span className="login-text" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Login</span>}
           </button>
 
           <Link to="/cart" className="navbar-icon-btn cart-btn">
