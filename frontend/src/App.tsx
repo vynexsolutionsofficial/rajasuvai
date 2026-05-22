@@ -17,6 +17,7 @@ import ShippingPolicy from './pages/Policies/ShippingPolicy';
 import ReturnsPolicy from './pages/Policies/ReturnsPolicy';
 import PrivacyPolicy from './pages/Policies/PrivacyPolicy';
 import TermsOfService from './pages/Policies/TermsOfService';
+import Wholesale from './pages/Wholesale/Wholesale';
 
 // Admin Components
 import AdminLayout from './components/admin/AdminLayout';
@@ -75,6 +76,7 @@ function App() {
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           <Route path="/contact" element={<SupportPage />} />
           <Route path="/story" element={<OurStory />} />
+          <Route path="/wholesale" element={<Wholesale />} />
           
           {/* Policy Routes */}
           <Route path="/shipping" element={<ShippingPolicy />} />

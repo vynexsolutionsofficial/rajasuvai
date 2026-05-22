@@ -27,9 +27,11 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
   else if (name.includes('Cashew')) badge = 'SALE';
   else if (name.includes('Amla')) badge = 'BESTSELLER';
 
-  const weight = '250g';
   const numericPrice = parseFloat(price.replace(/[^0-9.]/g, '')) || 0;
-  const oldPrice = Math.round(numericPrice * 1.2);
+
+  // Extract weight from the product name (e.g. "Fried Gram 50gm" -> "50gm")
+  const weightMatch = name.match(/(\d+\s*(?:kg|g|gm|ml|l))/i);
+  const weight = weightMatch ? weightMatch[1].toLowerCase() : '';
 
   return (
     <div className="sp-card" onClick={() => navigate(`/product/${id}`)}>
@@ -54,7 +56,6 @@ const ShopProductCard: React.FC<ProductCardProps> = (product) => {
         <div className="sp-footer">
           <div className="sp-prices">
             <span className="sp-price">₹{numericPrice}</span>
-            <span className="sp-old-price">₹{oldPrice}</span>
           </div>
           <button
             className={`sp-add-btn${added ? ' sp-add-btn--added' : ''}`}

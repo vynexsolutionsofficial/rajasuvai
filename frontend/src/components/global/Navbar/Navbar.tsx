@@ -72,6 +72,7 @@ const Navbar: React.FC = () => {
           </div>
           <Link to="/" className={location.pathname === '/' ? 'active' : ''}>HOME</Link>
           <Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>SHOP SPICES</Link>
+          <Link to="/wholesale" className={location.pathname === '/wholesale' ? 'active' : ''}>WHOLESALE</Link>
           <Link to="/story" className={location.pathname === '/story' ? 'active' : ''}>OUR STORY</Link>
           <Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>CONTACT</Link>
           {isAdmin && (

@@ -14,12 +14,6 @@ interface Product {
   inventory?: { quantity: number }[];
 }
 
-// Static review data
-const STATIC_REVIEWS = [
-  { id: 1, name: 'Priya M.', avatar: 'P', stars: 5, date: 'March 2025', text: "Absolutely the best quality spice I've tried! The aroma alone is incredible. Will definitely buy again.", verified: true },
-  { id: 2, name: 'Raju K.', avatar: 'R', stars: 5, date: 'Feb 2025', text: "Fresh, pure, and authentic. My biriyani has never tasted so good since I started using Rajasuvai spices.", verified: true },
-  { id: 3, name: 'Lakshmi S.', avatar: 'L', stars: 4, date: 'Jan 2025', text: "Great product and fast delivery. Packaging is secure and eco-friendly. Slight bitter edge, but overall excellent.", verified: false },
-];
 
 // Product descriptions by name
 const getDescription = (name: string) => {
@@ -39,8 +33,6 @@ const getDescription = (name: string) => {
 
 // Dynamic image loading is handled by getProductAllImages
 
-const WEIGHT_OPTIONS = ['50g', '100g', '250g', '500g', '1kg'];
-
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -51,8 +43,7 @@ const ProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
-  const [selectedWeight, setSelectedWeight] = useState('250g');
-  const [activeTab, setActiveTab] = useState<'description' | 'nutrition' | 'usage'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'package'>('description');
   const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
@@ -73,8 +64,10 @@ const ProductDetail: React.FC = () => {
   }, [id]);
 
   if (loading) return (
-    <div className="pd-page container">
-      <div className="pd-loading"><div className="pd-spinner"></div><p>Loading...</p></div>
+    <div className="pd-loading" style={{ flexDirection: 'column', textAlign: 'center', padding: '100px 20px', color: '#57534E' }}>
+      <div className="pd-spinner" style={{ margin: '0 auto 20px' }}></div>
+      <h3 style={{ margin: '0 0 10px', color: '#1C1917' }}>Waking up our servers... ☕</h3>
+      <p style={{ margin: 0 }}>This might take up to a minute. Thank you for your patience!</p>
     </div>
   );
 
@@ -89,8 +82,11 @@ const ProductDetail: React.FC = () => {
 
   const images = getProductAllImages(product.image);
   const description = getDescription(product.name);
-  const rating = 4.8;
   const numPrice = parseFloat(product.price.replace(/[^0-9.]/g, ''));
+  
+  // Extract weight from the product name
+  const weightMatch = product.name.match(/(\d+\s*(?:kg|g|gm|ml|l))/i);
+  const actualWeight = weightMatch ? weightMatch[1].toLowerCase() : 'N/A';
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) addToCart(product);
@@ -134,8 +130,12 @@ const ProductDetail: React.FC = () => {
               className="pd-main-img"
             />
             {/* Prev/Next arrows */}
-            <button className="pd-arrow pd-arrow-left" onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}>‹</button>
-            <button className="pd-arrow pd-arrow-right" onClick={() => setActiveImg(i => (i + 1) % images.length)}>›</button>
+            {images.length > 1 && (
+              <>
+                <button className="pd-arrow pd-arrow-left" onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}>‹</button>
+                <button className="pd-arrow pd-arrow-right" onClick={() => setActiveImg(i => (i + 1) % images.length)}>›</button>
+              </>
+            )}
           </div>
         </div>
 
@@ -150,11 +150,11 @@ const ProductDetail: React.FC = () => {
           <div className="pd-rating-row">
             <div className="pd-stars">
               {[1,2,3,4,5].map(s => (
-                <span key={s} className={s <= Math.round(rating) ? 'star-on' : 'star-off'}>★</span>
+                <span key={s} className="star-on">★</span>
               ))}
             </div>
-            <span className="pd-rating-num">{rating}</span>
-            <span className="pd-review-count">(124 Reviews)</span>
+            <span className="pd-rating-num">5.0</span>
+            <span className="pd-review-count">(Verified Quality)</span>
             {(() => {
               const qty = product.inventory?.[0]?.quantity ?? null;
               if (qty === null) return null;
@@ -167,25 +167,22 @@ const ProductDetail: React.FC = () => {
           {/* Price */}
           <div className="pd-price-row">
             <span className="pd-price">₹{numPrice}</span>
-            <span className="pd-price-old">₹{Math.round(numPrice * 1.2)}</span>
-            <span className="pd-discount-badge">20% OFF</span>
           </div>
-          <p className="pd-tax-note">Inclusive of all taxes. Free delivery on orders above ₹999.</p>
+          <p className="pd-tax-note">Inclusive of all taxes.</p>
 
-          {/* Weight Options */}
+          {/* Actual Weight */}
           <div className="pd-options-block">
-            <p className="pd-option-label">WEIGHT: <strong>{selectedWeight}</strong></p>
-            <div className="pd-weight-options">
-              {WEIGHT_OPTIONS.map(w => (
-                <button
-                  key={w}
-                  className={`pd-weight-btn ${selectedWeight === w ? 'active' : ''}`}
-                  onClick={() => setSelectedWeight(w)}
-                >
-                  {w}
-                </button>
-              ))}
-            </div>
+            <p className="pd-option-label">NET WEIGHT: <strong style={{color: '#E8600A', fontSize: '1.1rem'}}>{actualWeight}</strong></p>
+          </div>
+
+          {/* Offers */}
+          <div className="pd-offers-block">
+            <p className="pd-offers-label">AVAILABLE OFFERS:</p>
+            <ul className="pd-offers-list">
+              <li><span className="pd-offer-icon">🏷️</span> <strong>Bank Offer:</strong> 10% instant discount on HDFC Bank Credit Cards.</li>
+              <li><span className="pd-offer-icon">🎉</span> <strong>Special Price:</strong> Get extra 5% off on buying 3 or more units.</li>
+              <li><span className="pd-offer-icon">🚚</span> <strong>Free Shipping:</strong> On all orders above ₹999.</li>
+            </ul>
           </div>
 
           {/* Quantity + Actions */}
@@ -201,44 +198,48 @@ const ProductDetail: React.FC = () => {
             <button className="pd-btn-buy" onClick={handleBuyNow}>Buy Now</button>
           </div>
 
+          {/* Delivery Options */}
+          <div className="pd-delivery-block">
+            <p className="pd-delivery-label">DELIVERY & RETURNS:</p>
+            <div className="pd-delivery-info">
+              <p><span>📍</span> Standard Delivery by <strong>{new Date(Date.now() + 3*24*60*60*1000).toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'})}</strong></p>
+              <p><span>⚡</span> Usually dispatched within 24 hours.</p>
+              <p><span>📦</span> 7 Days Replacement Policy</p>
+            </div>
+          </div>
+
           {/* Payment Methods */}
           <div className="pd-payment-block">
             <p className="pd-payment-label">SECURE PAYMENT:</p>
             <div className="pd-payment-icons">
-              <div className="pd-pay-icon">
-                <span className="pi-visa">VISA</span>
-              </div>
-              <div className="pd-pay-icon pi-mc">
-                <div className="pi-circle c1"></div>
-                <div className="pi-circle c2"></div>
-              </div>
+              <div className="pd-pay-icon"><span className="pi-visa">VISA</span></div>
+              <div className="pd-pay-icon pi-mc"><div className="pi-circle c1"></div><div className="pi-circle c2"></div></div>
               <div className="pd-pay-icon pi-upi">UPI</div>
               <div className="pd-pay-icon pi-text">Net Banking</div>
               <div className="pd-pay-icon pi-text">Wallets</div>
             </div>
+            <p className="pd-secure-note">🔒 SSL Secured Checkout</p>
           </div>
 
           {/* Guarantees */}
           <div className="pd-guarantees">
-            <div className="pd-guarantee-item"><span>🚚</span><div><strong>Free Delivery</strong><small>On orders above ₹999</small></div></div>
-            <div className="pd-guarantee-item"><span>↩️</span><div><strong>Easy Returns</strong><small>7-day return policy</small></div></div>
             <div className="pd-guarantee-item"><span>🌿</span><div><strong>100% Organic</strong><small>No artificial additives</small></div></div>
             <div className="pd-guarantee-item"><span>🏆</span><div><strong>FSSAI Certified</strong><small>Quality guaranteed</small></div></div>
           </div>
         </div>
       </div>
 
-      {/* ════════════ TABS: Description / Nutrition / Usage ════════════ */}
+      {/* ════════════ TABS: Description / Package Details ════════════ */}
       <div className="pd-tabs-section">
         <div className="pd-tabs-inner">
           <div className="pd-tabs">
-            {(['description', 'nutrition', 'usage'] as const).map(tab => (
+            {(['description', 'package'] as const).map(tab => (
               <button
                 key={tab}
                 className={`pd-tab ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => setActiveTab(tab as any)}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'description' ? 'Description' : 'Package Details'}
               </button>
             ))}
           </div>
@@ -252,85 +253,46 @@ const ProductDetail: React.FC = () => {
                   <div className="pd-feature"><span>🌱</span><p><strong>Sourcing</strong><br />Directly from certified farms in South India</p></div>
                   <div className="pd-feature"><span>🧪</span><p><strong>Lab Tested</strong><br />Third-party quality &amp; purity certified</p></div>
                   <div className="pd-feature"><span>📦</span><p><strong>Packaging</strong><br />Nitrogen-flushed, airtight, biodegradable</p></div>
-                  <div className="pd-feature"><span>⏳</span><p><strong>Shelf Life</strong><br />18 months from date of manufacture</p></div>
+                  <div className="pd-feature"><span>⏳</span><p><strong>Shelf Life</strong><br />Best before 9 months from packaging</p></div>
                 </div>
               </div>
             )}
-            {activeTab === 'nutrition' && (
+            {activeTab === 'package' && (
               <div className="pd-nutrition">
-                <h3>Nutrition Facts <small>(per 100g)</small></h3>
-                <table className="pd-nutrition-table">
-                  <tbody>
-                    {[
-                      ['Energy', '354 kcal'], ['Protein', '7.8g'], ['Carbohydrates', '64.9g'],
-                      ['Dietary Fibre', '22.7g'], ['Total Fat', '9.9g'], ['Saturated Fat', '2.1g'],
-                      ['Sodium', '38mg'], ['Calcium', '182mg'], ['Iron', '47.5mg'],
-                    ].map(([label, value]) => (
-                      <tr key={label}><td>{label}</td><td><strong>{value}</strong></td></tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {activeTab === 'usage' && (
-              <div className="pd-usage">
-                <h3>How to Use</h3>
-                <div className="pd-usage-steps">
-                  <div className="pd-step"><span className="step-num">1</span><p><strong>Measure</strong> — Use ½–1 tsp per serving for optimal flavour.</p></div>
-                  <div className="pd-step"><span className="step-num">2</span><p><strong>Temper</strong> — Add to hot oil or ghee at the start of cooking to bloom the spice.</p></div>
-                  <div className="pd-step"><span className="step-num">3</span><p><strong>Finish</strong> — Sprinkle a pinch near the end of cooking to brighten aroma.</p></div>
-                  <div className="pd-step"><span className="step-num">4</span><p><strong>Store</strong> — Keep in a cool, dry, airtight container away from sunlight.</p></div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ════════════ REVIEWS ════════════ */}
-      <div className="pd-reviews-section">
-        <div className="pd-reviews-inner">
-          <div className="pd-reviews-header">
-            <div>
-              <h2 className="pd-reviews-title">Customer Reviews</h2>
-              <p className="pd-reviews-sub">Based on 124 verified purchases</p>
-            </div>
-            <div className="pd-overall-rating">
-              <span className="pd-big-rating">{rating}</span>
-              <div>
-                <div className="pd-stars-lg">{[1,2,3,4,5].map(s=><span key={s} className={s<=Math.round(rating)?'star-on':'star-off'}>★</span>)}</div>
-                <p>4.8 out of 5</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Rating bars */}
-          <div className="pd-rating-bars">
-            {[[5,78],[4,18],[3,3],[2,1],[1,0]].map(([stars, pct])=>(
-              <div key={stars} className="pd-bar-row">
-                <span>{stars}★</span>
-                <div className="pd-bar-track"><div className="pd-bar-fill" style={{width:`${pct}%`}}></div></div>
-                <span>{pct}%</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Review cards */}
-          <div className="pd-review-cards">
-            {STATIC_REVIEWS.map(r => (
-              <div key={r.id} className="pd-review-card">
-                <div className="pd-review-top">
-                  <div className="pd-reviewer-avatar">{r.avatar}</div>
-                  <div>
-                    <strong>{r.name}</strong>
-                    {r.verified && <span className="pd-verified">✓ Verified Purchase</span>}
-                    <p className="pd-review-date">{r.date}</p>
+                <h3>Package Information</h3>
+                <div className="pd-package-info">
+                  <div className="pd-pkg-block">
+                    <h4>Processed and Marketed By:</h4>
+                    <p><strong>Rajasuvai Foods Pvt Ltd</strong></p>
+                    <p>Door No: 3/122, Balakrishna Street, Balakrishna Nagar,</p>
+                    <p>Periyapanichery, Kovur, Chennai - 600128.</p>
                   </div>
-                  <div className="pd-review-stars">{'★'.repeat(r.stars)}{'☆'.repeat(5-r.stars)}</div>
+
+                  <div className="pd-pkg-block">
+                    <h4>Customer Care:</h4>
+                    <p><strong>Mobile:</strong> +91 87544 15050</p>
+                    <p><strong>Email ID:</strong> rajasuvaifoods@gmail.com</p>
+                    <p><strong>Website:</strong> www.Rajasuvai.com</p>
+                  </div>
+
+                  <div className="pd-pkg-block">
+                    <h4>Certifications & Licences:</h4>
+                    <p><strong>fssai Lic. No:</strong> 12421008000801</p>
+                    <p>An ISO 9001:2015, ISO 14001:2015, ISO 22000:2018 Certified Company</p>
+                    <div className="pd-cert-logos">
+                      <span className="pd-fssai-text">fssai</span>
+                      <span className="pd-iso-text">ISO Certified</span>
+                    </div>
+                  </div>
+
+                  <div className="pd-pkg-block">
+                    <h4>Other Information:</h4>
+                    <p><strong>Shelf Life:</strong> Best Before 9 Months From Packaging</p>
+                    <p>Photograph shown on this pack is of raw materials and final product.</p>
+                  </div>
                 </div>
-                <p className="pd-review-text">"{r.text}"</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

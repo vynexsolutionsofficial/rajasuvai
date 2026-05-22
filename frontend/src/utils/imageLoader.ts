@@ -16,6 +16,10 @@ for (const [key, mod] of Object.entries(modules)) {
 export const getProductCoverImage = (folderName: string | undefined): string => {
   if (!folderName) return '';
 
+  if (folderName.startsWith('http://') || folderName.startsWith('https://')) {
+    return folderName;
+  }
+
   const folder = folderName.toLowerCase();
 
   // Prefer the image that contains '01' (main cover shot)
@@ -31,6 +35,10 @@ export const getProductCoverImage = (folderName: string | undefined): string => 
 
 export const getProductAllImages = (folderName: string | undefined): string[] => {
   if (!folderName) return [];
+
+  if (folderName.startsWith('http://') || folderName.startsWith('https://')) {
+    return [folderName];
+  }
 
   const folder = folderName.toLowerCase();
 

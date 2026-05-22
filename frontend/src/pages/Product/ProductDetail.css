@@ -709,270 +709,157 @@
   margin-bottom: 2px;
 }
 
-/* Nutrition table */
-.pd-nutrition-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-
-.pd-nutrition-table tr {
-  border-bottom: 1px solid #F5F4F2;
-}
-
-.pd-nutrition-table tr:last-child {
-  border-bottom: none;
-}
-
-.pd-nutrition-table td {
-  padding: 10px 8px;
-  color: #57534E;
-}
-
-.pd-nutrition-table td:first-child {
-  color: #1C1917;
-}
-
-.pd-nutrition-table td strong {
-  color: #1C1917;
-  font-weight: 700;
-}
-
-/* Usage steps */
-.pd-usage-steps {
+/* Package Info Styles */
+.pd-package-info {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
-.pd-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
+.pd-pkg-block {
   background: #FAFAF8;
-  border-radius: 12px;
-  padding: 14px;
   border: 1px solid #F5F4F2;
+  border-radius: 12px;
+  padding: 16px;
 }
 
-.step-num {
-  width: 28px;
-  height: 28px;
-  background: #E8600A;
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.82rem;
-  font-weight: 800;
-  flex-shrink: 0;
+.pd-pkg-block h4 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #E8600A;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.pd-step p {
+.pd-pkg-block p {
   font-size: 0.85rem;
   color: #57534E;
-  margin: 0;
-  line-height: 1.6;
+  margin: 0 0 4px 0;
+  line-height: 1.5;
 }
 
-.pd-step strong {
+.pd-pkg-block p strong {
   color: #1C1917;
+}
+
+.pd-cert-logos {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pd-fssai-text, .pd-iso-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #E7E5E4;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1C1917;
+}
+
+.pd-fssai-text {
+  font-style: italic;
+  letter-spacing: 1px;
 }
 
 /* ════════════════════════════════════════
-   REVIEWS SECTION
+   OFFERS & DELIVERY BLOCKS
 ════════════════════════════════════════ */
-.pd-reviews-section {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 24px 40px;
+
+.pd-offers-block {
+  background: #FFF7ED;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #FFEDD5;
 }
 
-.pd-reviews-inner {
-  background: #fff;
-  border-radius: 20px;
-  border: 1px solid #E7E5E4;
-  padding: 32px;
+.pd-offers-label,
+.pd-delivery-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #E8600A;
+  margin-bottom: 12px;
 }
 
-.pd-reviews-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #F5F4F2;
-}
-
-.pd-reviews-title {
-  font-family: 'Outfit', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 800;
+.pd-delivery-label {
   color: #1C1917;
-  margin: 0 0 4px 0;
 }
 
-.pd-reviews-sub {
-  font-size: 0.82rem;
-  color: #A8A29E;
+.pd-offers-list {
+  list-style: none;
+  padding: 0;
   margin: 0;
-}
-
-.pd-overall-rating {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-shrink: 0;
-  background: #FAFAF8;
-  border-radius: 16px;
-  padding: 16px 20px;
-  border: 1px solid #E7E5E4;
-}
-
-.pd-big-rating {
-  font-family: 'Outfit', sans-serif;
-  font-size: 2.6rem;
-  font-weight: 900;
-  color: #1C1917;
-  line-height: 1;
-}
-
-.pd-stars-lg .star-on {
-  color: #F59E0B;
-  font-size: 1.1rem;
-}
-
-.pd-stars-lg .star-off {
-  color: #E7E5E4;
-  font-size: 1.1rem;
-}
-
-.pd-overall-rating p {
-  font-size: 0.75rem;
-  color: #A8A29E;
-  margin: 4px 0 0 0;
-}
-
-/* Rating Bars */
-.pd-rating-bars {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.pd-bar-row {
-  display: flex;
-  align-items: center;
   gap: 10px;
-  font-size: 0.82rem;
-  color: #57534E;
 }
 
-.pd-bar-row > span:first-child {
-  width: 28px;
-  text-align: right;
-  color: #1C1917;
-  font-weight: 600;
-  font-size: 0.78rem;
-}
-
-.pd-bar-track {
-  flex: 1;
-  height: 7px;
-  background: #F5F4F2;
-  border-radius: 100px;
-  overflow: hidden;
-}
-
-.pd-bar-fill {
-  height: 100%;
-  background: #F59E0B;
-  border-radius: 100px;
-  transition: width 0.4s ease;
-}
-
-.pd-bar-row > span:last-child {
-  width: 30px;
-  font-size: 0.75rem;
-  color: #A8A29E;
-}
-
-/* Review Cards */
-.pd-review-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.pd-review-card {
-  padding: 20px 0;
-  border-bottom: 1px solid #F5F4F2;
-}
-
-.pd-review-card:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.pd-review-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.pd-reviewer-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #E8600A;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.pd-review-top > div:nth-child(2) {
-  flex: 1;
-}
-
-.pd-review-top strong {
-  font-size: 0.88rem;
-  color: #1C1917;
-  font-weight: 700;
-}
-
-.pd-verified {
-  margin-left: 8px;
-  font-size: 0.7rem;
-  color: #16A34A;
-  font-weight: 600;
-}
-
-.pd-review-date {
-  font-size: 0.75rem;
-  color: #A8A29E;
-  margin: 2px 0 0 0;
-}
-
-.pd-review-stars {
-  font-size: 0.88rem;
-  color: #F59E0B;
-  letter-spacing: 1px;
-  flex-shrink: 0;
-}
-
-.pd-review-text {
+.pd-offers-list li {
   font-size: 0.85rem;
   color: #57534E;
-  line-height: 1.7;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.pd-offer-icon {
+  flex-shrink: 0;
+}
+
+.pd-offers-list strong {
+  color: #1C1917;
+  font-weight: 600;
+}
+
+.pd-delivery-block {
+  background: #FAFAF8;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border: 1px solid #F5F4F2;
+}
+
+.pd-delivery-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pd-delivery-info p {
   margin: 0;
+  font-size: 0.85rem;
+  color: #57534E;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pd-delivery-info p span {
+  font-size: 1.1rem;
+}
+
+.pd-delivery-info strong {
+  color: #1C1917;
+}
+
+.pd-secure-note {
+  font-size: 0.75rem;
+  color: #16A34A;
+  font-weight: 600;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* ════════════════════════════════════════

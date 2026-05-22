@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\(Object.keys\\(l\\).filter\\(k => /facebook|linkedin|instagram|twitter/i.test\\(k\\)\\)\\)\")",
+      "Bash(git push *)",
+      "Bash(git remote *)",
+      "Bash(dir /s /b)",
+      "Bash(Get-ChildItem -Recurse \"d:\\\\user1\\\\Desktop\\\\vyne\\\\suvai\\\\frontend\\\\src\\\\assets\")",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx vite *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\user1\\\\Desktop\\\\vyne\\\\suvai\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(xargs ls -la)",
+      "Bash(node scripts/check_schema.js)",
+      "Bash(node scripts/list_products.js)"
+    ]
+  }
+}
