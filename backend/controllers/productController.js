@@ -4,10 +4,19 @@ export const getProducts = async (req, res) => {
   const { category, priceMin, priceMax, offset, limit, search, sort } = req.query;
 
   try {
-    let query = supabase.from('products').select('*, inventory(quantity)', { count: 'exact' });
+    let query = supabase
+      .from('products')
+      .select('*, categories(name), inventory(quantity)', { count: 'exact' });
 
+    // Filter by category via category_id (look up by name first)
     if (category && category !== 'All') {
-      query = query.eq('category', category);
+      const { data: catRow } = await supabase
+        .from('categories')
+        .select('id')
+        .ilike('name', category)
+        .single();
+      // If category not found return empty result set
+      query = query.eq('category_id', catRow ? catRow.id : -1);
     }
 
     if (search) {

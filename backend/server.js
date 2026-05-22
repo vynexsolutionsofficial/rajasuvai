@@ -187,6 +187,16 @@ app.post('/api/auth/login', async (req, res) => {
 
 // --- PRODUCT ROUTES (PUBLIC) ---
 
+// Public categories endpoint (Shop sidebar fetches this dynamically)
+app.get('/api/categories', async (req, res) => {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name')
+    .order('name');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 app.get('/api/products', async (req, res) => {
   const { data, error } = await supabase
     .from('products')

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, X } from 'lucide-react';
+import { api } from '../../services/api';
 import ShopProductGrid from './ShopProductGrid';
 import './Shop.css';
 
@@ -13,14 +14,25 @@ const Shop: React.FC = () => {
   const [activeSort, setActiveSort] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [categories, setCategories] = useState<string[]>(['All']);
   const itemsPerPage = 12;
+
+  // Fetch real categories from DB
+  useEffect(() => {
+    api.get('/api/categories').then((data: { id: number; name: string }[]) => {
+      if (Array.isArray(data)) {
+        setCategories(['All', ...data.map((c) => c.name)]);
+      }
+    }).catch(() => {
+      // Fallback if API unreachable
+      setCategories(['All', 'Spices', 'Flours', 'Pulses']);
+    });
+  }, []);
 
   // Reset to page 1 when URL search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [urlSearch]);
-
-  const categories = ['All', 'Spices', 'Masalas', 'Oils', 'Snacks'];
   const priceRanges: { label: string; value: [number, number | null] }[] = [
     { label: 'All Prices', value: [0, null] },
     { label: '₹0 - ₹200', value: [0, 200] },

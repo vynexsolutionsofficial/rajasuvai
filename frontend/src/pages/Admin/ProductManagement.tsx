@@ -4,6 +4,16 @@ import './ProductManagement.css';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
 import { supabase } from '../../supabaseClient';
+import { getProductCoverImage } from '../../utils/imageLoader';
+
+// Resolves an image field to a displayable URL:
+// - If it starts with http/https → use directly (uploaded URL)
+// - Otherwise → treat as an asset folder name and resolve via imageLoader
+const resolveImage = (image: string | undefined): string => {
+  if (!image) return '';
+  if (image.startsWith('http') || image.startsWith('/')) return image;
+  return getProductCoverImage(image) || '';
+};
 
 interface Category {
   id: number;
@@ -193,7 +203,7 @@ const ProductManagement: React.FC = () => {
                   <tr key={product.id}>
                     <td>
                       <div className="product-cell">
-                        <img src={product.image} alt={product.name} className="product-thumb" />
+                        <img src={resolveImage(product.image)} alt={product.name} className="product-thumb" />
                         <div>
                           <div style={{ fontWeight: 600 }}>{product.name}</div>
                           <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>SKU: {product.sku || 'N/A'}</div>
@@ -354,11 +364,11 @@ const ProductManagement: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label>Product Image</label>
+                <label>Product Image <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>folder name or URL</span></label>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                   {currentProduct.image && (
                     <img
-                      src={currentProduct.image}
+                      src={resolveImage(currentProduct.image)}
                       alt="preview"
                       style={{ width: '70px', height: '70px', borderRadius: '10px', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
                     />
@@ -366,7 +376,7 @@ const ProductManagement: React.FC = () => {
                   <div style={{ flex: 1 }}>
                     <input
                       type="text"
-                      placeholder="Paste image URL or upload below"
+                      placeholder="e.g. kadalai  —or—  https://..."
                       value={currentProduct.image || ''}
                       required
                       onChange={(e) => setCurrentProduct({...currentProduct, image: e.target.value})}
