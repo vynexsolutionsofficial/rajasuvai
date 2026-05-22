@@ -14,6 +14,8 @@ interface Product {
   id: number;
   name: string;
   price: string;
+  bulk_rate?: number | null;
+  wholesale_price?: number | null;
   category_id: number;
   image: string;
   description: string;
@@ -174,7 +176,8 @@ const ProductManagement: React.FC = () => {
               <tr>
                 <th>Product Info</th>
                 <th>Category</th>
-                <th>Price</th>
+                <th>Retail</th>
+                <th>Bulk / Wholesale</th>
                 <th>Stock Status</th>
                 <th>Actions</th>
               </tr>
@@ -198,7 +201,14 @@ const ProductManagement: React.FC = () => {
                       </div>
                     </td>
                     <td>{product.categories?.name || 'Uncategorized'}</td>
-                    <td>{product.price}</td>
+                    <td style={{ fontWeight: 600 }}>₹{product.price}</td>
+                    <td style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)' }}>
+                      {product.bulk_rate != null ? (
+                        <span>B: ₹{product.bulk_rate} / W: ₹{product.wholesale_price}</span>
+                      ) : (
+                        <span style={{ color: 'rgba(255,255,255,0.25)' }}>—</span>
+                      )}
+                    </td>
                     <td>
                       <div className={`status-pill ${isOut ? 'out' : isLow ? 'low' : 'good'}`}>
                         {isOut ? <X size={12} /> : isLow ? <AlertTriangle size={12} /> : <Package size={12} />}
@@ -255,18 +265,19 @@ const ProductManagement: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Price (e.g., ₹250)</label>
-                  <input 
-                    type="text" 
-                    value={currentProduct.price || ''} 
+                  <label>Retail Price (₹)</label>
+                  <input
+                    type="text"
+                    value={currentProduct.price || ''}
                     required
+                    placeholder="e.g. 250"
                     onChange={(e) => setCurrentProduct({...currentProduct, price: e.target.value})}
                   />
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
                   <label>Category</label>
-                  <select 
-                    value={currentProduct.category_id || ''} 
+                  <select
+                    value={currentProduct.category_id || ''}
                     required
                     onChange={(e) => setCurrentProduct({...currentProduct, category_id: parseInt(e.target.value)})}
                   >
@@ -275,6 +286,31 @@ const ProductManagement: React.FC = () => {
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Bulk Rate (₹) <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>optional</span></label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 96"
+                    value={currentProduct.bulk_rate ?? ''}
+                    onChange={(e) => setCurrentProduct({...currentProduct, bulk_rate: e.target.value ? parseFloat(e.target.value) : null})}
+                  />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Wholesale Price (₹) <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>optional</span></label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 102"
+                    value={currentProduct.wholesale_price ?? ''}
+                    onChange={(e) => setCurrentProduct({...currentProduct, wholesale_price: e.target.value ? parseFloat(e.target.value) : null})}
+                  />
                 </div>
               </div>
 
