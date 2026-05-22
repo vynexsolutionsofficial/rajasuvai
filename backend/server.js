@@ -18,9 +18,18 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 
 const app = express();
-const PORT = 3000; // Forced to 3000 for consistency with frontend
+const PORT = process.env.PORT || 3001; // Changed to 3001 to avoid collision with HackFlow
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:4173',
+    /\.vercel\.app$/,
+    /\.netlify\.app$/
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
