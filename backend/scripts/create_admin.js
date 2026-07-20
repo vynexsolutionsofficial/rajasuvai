@@ -1,8 +1,8 @@
 // Run this via node to create the primary admin user
 import { supabase } from '../supabaseClient.js';
 
-const ADMIN_EMAIL = 'admin_suvai@gmail.com';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_EMAIL = 'admin@rajasuvai.com';
+const ADMIN_PASSWORD = 'AdminPassword123!';
 
 async function createAdmin() {
   console.log('--- Creating Official Admin User ---');

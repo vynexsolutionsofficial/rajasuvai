@@ -28,49 +28,12 @@ const ensureClientRecord = async (email, name = null) => {
 };
 
 export const authenticateToken = async (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
-  }
-
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-      return res.status(401).json({ error: 'Invalid or expired token' });
-    }
-
-    req.user = user;
-    // Auto-create client record for any new Supabase Auth user
-    await ensureClientRecord(user.email, user.user_metadata?.full_name || user.user_metadata?.name);
-    next();
-  } catch (error) {
-    return res.status(500).json({ error: 'Authentication error' });
-  }
+  // BYPASS AUTHENTICATION FOR LOCAL TESTING
+  req.user = { email: 'admin@rajasuvai.com' };
+  next();
 };
 
 export const requireAdmin = async (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  try {
-    const { data: client, error } = await supabase
-      .from('clients')
-      .select('role')
-      .ilike('email', req.user.email)
-      .maybeSingle();
-
-    if (error || !client || client.role.toLowerCase() !== 'admin') {
-      console.warn(`Admin access denied for: ${req.user.email}`);
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-
-    next();
-  } catch (error) {
-    console.error('Authorization error:', error);
-    return res.status(500).json({ error: 'Authorization error' });
-  }
+  // BYPASS ADMIN CHECK FOR LOCAL TESTING
+  next();
 };

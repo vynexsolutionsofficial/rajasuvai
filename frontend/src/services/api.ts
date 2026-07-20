@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = '';
 
 let tokenCache: { token: string | null; expiry: number } = { token: null, expiry: 0 };
 
@@ -24,9 +24,12 @@ const throwIfError = async (response: Response) => {
 export const api = {
   async get(endpoint: string, params: Record<string, any> = {}) {
     const token = await getAuthToken();
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-    const response = await fetch(url.toString(), {
+    let urlStr = `${API_BASE_URL}${endpoint}`;
+    const qs = new URLSearchParams(params).toString();
+    if (qs) {
+      urlStr += urlStr.includes('?') ? `&${qs}` : `?${qs}`;
+    }
+    const response = await fetch(urlStr, {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
     });
     return throwIfError(response);

@@ -27,6 +27,10 @@ interface Product {
   bulk_rate?: number | null;
   wholesale_price?: number | null;
   category_id: number;
+  size_g?: number | null;
+  mrp?: number | null;
+  offer?: string | null;
+  kg?: number | null;
   image: string;
   description: string;
   sku: string;
@@ -184,11 +188,13 @@ const ProductManagement: React.FC = () => {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Product Info</th>
-                <th>Category</th>
-                <th>Retail</th>
-                <th>Bulk / Wholesale</th>
-                <th>Stock Status</th>
+                <th>Product</th>
+                <th>Size (g)</th>
+                <th>MRP</th>
+                <th>Offer</th>
+                <th>Retail Price</th>
+                <th>Wholesale</th>
+                <th>Kg</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -206,25 +212,16 @@ const ProductManagement: React.FC = () => {
                         <img src={resolveImage(product.image)} alt={product.name} className="product-thumb" />
                         <div>
                           <div style={{ fontWeight: 600 }}>{product.name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>SKU: {product.sku || 'N/A'}</div>
+                          {product.categories?.name && <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{product.categories.name}</div>}
                         </div>
                       </div>
                     </td>
-                    <td>{product.categories?.name || 'Uncategorized'}</td>
-                    <td style={{ fontWeight: 600 }}>₹{product.price}</td>
-                    <td style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)' }}>
-                      {product.bulk_rate != null ? (
-                        <span>B: ₹{product.bulk_rate} / W: ₹{product.wholesale_price}</span>
-                      ) : (
-                        <span style={{ color: 'rgba(255,255,255,0.25)' }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className={`status-pill ${isOut ? 'out' : isLow ? 'low' : 'good'}`}>
-                        {isOut ? <X size={12} /> : isLow ? <AlertTriangle size={12} /> : <Package size={12} />}
-                        {stock} in stock
-                      </div>
-                    </td>
+                    <td>{product.size_g || '—'}</td>
+                    <td>{product.mrp ? `₹${product.mrp}` : '—'}</td>
+                    <td style={{ color: '#4ade80' }}>{product.offer || '—'}</td>
+                    <td style={{ fontWeight: 600 }}>{product.price ? (String(product.price).startsWith('₹') ? product.price : `₹${product.price}`) : '—'}</td>
+                    <td>{product.wholesale_price ? `₹${product.wholesale_price}` : '—'}</td>
+                    <td>{product.kg || '—'}</td>
                     <td>
                       <div className="action-buttons">
                         <button className="btn-icon" onClick={() => openEditModal(product)} title="Edit">
@@ -275,16 +272,6 @@ const ProductManagement: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Retail Price (₹)</label>
-                  <input
-                    type="text"
-                    value={currentProduct.price || ''}
-                    required
-                    placeholder="e.g. 250"
-                    onChange={(e) => setCurrentProduct({...currentProduct, price: e.target.value})}
-                  />
-                </div>
-                <div className="form-group" style={{ flex: 1 }}>
                   <label>Category</label>
                   <select
                     value={currentProduct.category_id || ''}
@@ -301,28 +288,74 @@ const ProductManagement: React.FC = () => {
 
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Bulk Rate (₹) <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>optional</span></label>
+                  <label>Size (g)</label>
                   <input
                     type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="e.g. 96"
-                    value={currentProduct.bulk_rate ?? ''}
-                    onChange={(e) => setCurrentProduct({...currentProduct, bulk_rate: e.target.value ? parseFloat(e.target.value) : null})}
+                    value={currentProduct.size_g ?? ''}
+                    placeholder="e.g. 100"
+                    onChange={(e) => setCurrentProduct({...currentProduct, size_g: e.target.value ? parseInt(e.target.value) : null})}
                   />
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Wholesale Price (₹) <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>optional</span></label>
+                  <label>MRP (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={currentProduct.mrp ?? ''}
+                    placeholder="e.g. 120"
+                    onChange={(e) => setCurrentProduct({...currentProduct, mrp: e.target.value ? parseFloat(e.target.value) : null})}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Offer</label>
+                  <input
+                    type="text"
+                    value={currentProduct.offer || ''}
+                    placeholder="e.g. 25%"
+                    onChange={(e) => setCurrentProduct({...currentProduct, offer: e.target.value})}
+                  />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Retail Price (₹)</label>
+                  <input
+                    type="text"
+                    value={currentProduct.price || ''}
+                    required
+                    placeholder="e.g. 90"
+                    onChange={(e) => setCurrentProduct({...currentProduct, price: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Wholesale Price (₹)</label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    placeholder="e.g. 102"
+                    placeholder="e.g. 81"
                     value={currentProduct.wholesale_price ?? ''}
                     onChange={(e) => setCurrentProduct({...currentProduct, wholesale_price: e.target.value ? parseFloat(e.target.value) : null})}
                   />
                 </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label>Kg</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 90"
+                    value={currentProduct.kg ?? ''}
+                    onChange={(e) => setCurrentProduct({...currentProduct, kg: e.target.value ? parseFloat(e.target.value) : null})}
+                  />
+                </div>
               </div>
+
+
 
               <div className="form-grid-2">
                 <div className="form-group">

@@ -232,13 +232,13 @@ app.get('/api/admin/products', authenticateToken, requireAdmin, async (req, res)
 });
 
 app.post('/api/admin/products', authenticateToken, requireAdmin, async (req, res) => {
-  const { name, price, bulk_rate, wholesale_price, category_id, image, description, sku, initial_stock, low_stock_threshold } = req.body;
+  const { name, price, bulk_rate, wholesale_price, size_g, mrp, offer, kg, category_id, image, description, sku, initial_stock, low_stock_threshold } = req.body;
 
   try {
     // Insert Product
     const { data: product, error: prodErr } = await supabase
       .from('products')
-      .insert([{ name, price, bulk_rate: bulk_rate || null, wholesale_price: wholesale_price || null, category_id, image, description, sku, status: 'active' }])
+      .insert([{ name, price, bulk_rate: bulk_rate || null, wholesale_price: wholesale_price || null, size_g: size_g || null, mrp: mrp || null, offer: offer || null, kg: kg || null, category_id, image, description, sku, status: 'active' }])
       .select()
       .single();
 
@@ -263,13 +263,13 @@ app.post('/api/admin/products', authenticateToken, requireAdmin, async (req, res
 
 app.put('/api/admin/products/:id', authenticateToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { name, price, bulk_rate, wholesale_price, category_id, image, description, sku, quantity, low_stock_threshold, status } = req.body;
+  const { name, price, bulk_rate, wholesale_price, size_g, mrp, offer, kg, category_id, image, description, sku, quantity, low_stock_threshold, status } = req.body;
 
   try {
     // Update Product
     const { error: prodErr } = await supabase
       .from('products')
-      .update({ name, price, bulk_rate: bulk_rate ?? null, wholesale_price: wholesale_price ?? null, category_id, image, description, sku, status })
+      .update({ name, price, bulk_rate: bulk_rate ?? null, wholesale_price: wholesale_price ?? null, size_g: size_g ?? null, mrp: mrp ?? null, offer: offer ?? null, kg: kg ?? null, category_id, image, description, sku, status })
       .eq('id', id);
 
     if (prodErr) throw prodErr;

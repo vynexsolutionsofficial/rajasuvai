@@ -196,6 +196,8 @@
   border: 1.5px solid rgba(255, 255, 255, 0.1);
   width: 600px;
   max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
   border-radius: 28px;
   padding: 3rem;
   box-shadow: 0 30px 60px rgba(0,0,0,0.6);

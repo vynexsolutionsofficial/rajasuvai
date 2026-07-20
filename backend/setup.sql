@@ -8,6 +8,12 @@ CREATE TABLE IF NOT EXISTS products (
   category TEXT,
   image TEXT,
   description TEXT,
+  bulk_rate DECIMAL(10,2),
+  wholesale_price DECIMAL(10,2),
+  size_g INTEGER,
+  mrp DECIMAL(10,2),
+  offer TEXT,
+  kg DECIMAL(10,2),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
