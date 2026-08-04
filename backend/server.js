@@ -1170,10 +1170,16 @@ app.post('/api/newsletter', async (req, res) => {
     return res.status(400).json({ error: 'Valid email is required' });
   }
   try {
+    // Plain INSERT rather than upsert: upsert needs UPDATE rights as well,
+    // which would mean granting the anon role read/write over the whole
+    // subscriber list. An insert-only policy keeps subscriber emails
+    // unreadable, so a duplicate is handled here instead (23505 =
+    // unique_violation, i.e. already subscribed — that's a success for the user).
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .upsert([{ email, subscribed_at: new Date().toISOString() }], { onConflict: 'email', ignoreDuplicates: true });
-    if (error) throw error;
+      .insert([{ email, subscribed_at: new Date().toISOString() }]);
+
+    if (error && error.code !== '23505') throw error;
     res.json({ success: true, message: 'Subscribed successfully' });
   } catch (error) {
     console.error('Newsletter error:', error.message);
