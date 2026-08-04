@@ -63,18 +63,13 @@ contents are unchanged.
   add to cart → fetch cart → create address. Two things it did not resolve
   are handled by `APPLY_NOW_2.sql` (see below).
 
-- **`APPLY_NOW_2.sql` (160 + 170) is still outstanding.** Found by running the
-  checkout flow for real:
-  - **Order creation is impossible** — `23505 duplicate key value violates
-    unique constraint "orders_pkey", Key (id)=(1) already exists`. Seed rows
-    were inserted with explicit ids without advancing the identity sequence,
-    so every INSERT collides at id 1. `160` resyncs every sequence in the
-    schema.
-  - **Contact Us is still blocked** — `support_tickets` returned 42501 even
-    after both `120` and `150` tried to add a permissive INSERT policy, so
-    something on that table overrides them. `170` disables RLS on it to match
-    every other table the backend writes to (see the trade-off note in the
-    file itself).
+- **`APPLY_NOW_2.sql` (160 + 170) — applied and verified 2026-08-04.** Full
+  checkout pipeline confirmed working end to end: login → profile → add to
+  cart → fetch cart → create address → **create order (DB insert, with
+  correct order_items.unit_price) succeeds**. `support_tickets` INSERT also
+  confirmed working. The checkout flow now fails only at the external
+  Razorpay API call — see "Known gaps" below, that's a credentials issue, not
+  a schema issue.
 
 - Historical context — before `APPLY_NOW.sql` these were all broken:
   - **Checkout fails entirely** — `createOrder` writes `orders.address_id` and
