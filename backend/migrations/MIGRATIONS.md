@@ -23,7 +23,11 @@ contents are unchanged.
 | `120_support_tickets_public_insert.sql` | RLS INSERT policy so guests can submit the public Contact Us form |
 | `130_newsletter_subscribers.sql` | Creates the missing `newsletter_subscribers` table + RLS INSERT policy |
 | `140_checkout_schema_reconciliation.sql` | Creates `cart_items` + `sales`, adds missing `orders`/`payments` columns, relaxes the order status constraint |
-| **`APPLY_NOW.sql`** | **120 + 130 + 140 combined — paste this into the Supabase SQL Editor** |
+| `150_support_tickets_rls_retry.sql` | Retry of the support_tickets INSERT policy (did not take effect) |
+| `160_resync_identity_sequences.sql` | Resyncs identity sequences — order creation fails with duplicate key without it |
+| `170_support_tickets_disable_rls.sql` | Disables RLS on support_tickets after 120/150 both failed to stick |
+| `APPLY_NOW.sql` | 120 + 130 + 140 combined — **applied 2026-08-04, verified** |
+| **`APPLY_NOW_2.sql`** | **160 + 170 combined — paste this into the Supabase SQL Editor** |
 | `seed_dummy_data.sql` | Sample/seed data — not a schema migration, run only for local dev seeding |
 
 ## Known gaps and caveats
@@ -52,9 +56,27 @@ contents are unchanged.
   and the `cart_items`/`sales` tables were never created by any migration at
   all despite the code depending on them.
 
-- **`120`, `130` and `140` are confirmed NOT applied and are required now.**
-  Run **`APPLY_NOW.sql`** (all three combined) in the Supabase SQL Editor.
-  Until then these user-facing flows are broken in production:
+- **`APPLY_NOW.sql` (120/130/140) was applied on 2026-08-04 and verified** —
+  8 of 9 live checks passed. `cart_items`, `sales`, `orders.address_id`,
+  `orders.metadata` and the three `payments` columns all confirmed present.
+  End-to-end testing after it then confirmed working: login → profile →
+  add to cart → fetch cart → create address. Two things it did not resolve
+  are handled by `APPLY_NOW_2.sql` (see below).
+
+- **`APPLY_NOW_2.sql` (160 + 170) is still outstanding.** Found by running the
+  checkout flow for real:
+  - **Order creation is impossible** — `23505 duplicate key value violates
+    unique constraint "orders_pkey", Key (id)=(1) already exists`. Seed rows
+    were inserted with explicit ids without advancing the identity sequence,
+    so every INSERT collides at id 1. `160` resyncs every sequence in the
+    schema.
+  - **Contact Us is still blocked** — `support_tickets` returned 42501 even
+    after both `120` and `150` tried to add a permissive INSERT policy, so
+    something on that table overrides them. `170` disables RLS on it to match
+    every other table the backend writes to (see the trade-off note in the
+    file itself).
+
+- Historical context — before `APPLY_NOW.sql` these were all broken:
   - **Checkout fails entirely** — `createOrder` writes `orders.address_id` and
     `orders.metadata`, neither of which exists, and the status values it uses
     (`pending_payment`, `paid`) violate the `orders_status_check` constraint.
