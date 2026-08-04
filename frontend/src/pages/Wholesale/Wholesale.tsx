@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import './Wholesale.css';
 import { Package, TrendingUp, Phone, Mail, ChevronRight } from 'lucide-react';
 import { api } from '../../services/api';
 import { getProductCoverImage } from '../../utils/imageLoader';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 interface Product {
   id: number;
@@ -10,6 +10,8 @@ interface Product {
   image: string;
   description?: string;
 }
+
+const bulkSizes = ['5kg', '10kg', '25kg', '50kg', '100kg+'];
 
 const Wholesale: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -20,9 +22,7 @@ const Wholesale: React.FC = () => {
     const fetchProducts = async () => {
       try {
         const data = await api.get('/api/products', { limit: 100 });
-        if (data.products) {
-          setProducts(data.products);
-        }
+        if (data.products) setProducts(data.products);
       } catch (err) {
         console.error('Error fetching wholesale products:', err);
       } finally {
@@ -32,102 +32,91 @@ const Wholesale: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const defaultQuantities = ['5kg', '10kg', '25kg', '50kg', '100kg+'];
-
   return (
-    <div className="wholesale-page">
-      
-      {/* Catalog Section (First) */}
-      <div className="wholesale-catalog-section">
-        <div className="catalog-header">
-          <h2>Our Wholesale Catalog</h2>
-          <p>Explore our premium range of spices available in large-scale packaging for businesses of all sizes.</p>
+    <div>
+      <section className="mx-auto max-w-(--container-page) px-6 py-10 sm:py-14">
+        <div className="mx-auto max-w-lg text-center">
+          <h1 className="font-display text-3xl font-bold text-brand-950">Our Wholesale Catalog</h1>
+          <p className="mt-2 text-sm text-black/55">Explore our premium range of spices available in large-scale packaging for businesses of all sizes.</p>
         </div>
-        
+
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>Loading products...</div>
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-2xl" />)}
+          </div>
         ) : (
-          <div className="catalog-grid">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
-              <div className="catalog-card" key={product.id}>
-                <div className="catalog-image-wrapper">
-                  <img 
-                    src={getProductCoverImage(product.image)} 
-                    alt={product.name} 
-                    className="catalog-image" 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=800&auto=format&fit=crop';
-                    }}
-                  />
+              <div key={product.id} className="overflow-hidden rounded-2xl border border-black/5 bg-white">
+                <div className="aspect-video bg-brand-50">
+                  <img src={getProductCoverImage(product.image)} alt={product.name} className="size-full object-cover" />
                 </div>
-                <div className="catalog-details">
-                  <h3>{product.name}</h3>
-                  <p className="catalog-desc">{product.description || `Premium wholesale ${product.name.toLowerCase()} sourced directly from farms.`}</p>
-                  <div className="catalog-price" style={{ marginBottom: '15px', fontSize: '1.1rem', fontWeight: 600, color: '#1c1917' }}>
-                    Wholesale Price: <span style={{ color: '#E8600A' }}>₹--- / kg</span>
-                  </div>
-                  <div className="catalog-quantities">
-                    <h4>Available Bulk Sizes:</h4>
-                    <div className="quantity-tags">
-                      {defaultQuantities.map((qty, idx) => (
-                        <span key={idx} className="quantity-tag">{qty}</span>
+                <div className="p-5">
+                  <h3 className="text-sm font-bold text-brand-950">{product.name}</h3>
+                  <p className="mt-1 line-clamp-2 text-xs text-black/50">
+                    {product.description || `Premium wholesale ${product.name.toLowerCase()} sourced directly from farms.`}
+                  </p>
+                  <p className="mt-3 text-sm font-semibold text-brand-950">
+                    Wholesale Price: <span className="text-brand-600">₹--- / kg</span>
+                  </p>
+                  <div className="mt-3">
+                    <p className="text-xs font-bold tracking-wide text-black/40">AVAILABLE BULK SIZES</p>
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {bulkSizes.map((qty) => (
+                        <span key={qty} className="rounded-full bg-black/5 px-2.5 py-1 text-[11px] font-semibold text-black/60">{qty}</span>
                       ))}
                     </div>
                   </div>
-                  <button className="quote-button" onClick={() => window.location.href = '/contact'}>
-                    Request Quote <ChevronRight size={16} />
+                  <button
+                    onClick={() => (window.location.href = '/contact')}
+                    className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-full bg-brand-500 py-2.5 text-xs font-bold text-white hover:bg-brand-600"
+                  >
+                    Request Quote <ChevronRight size={14} />
                   </button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Benefits Section */}
-      <div className="wholesale-benefits-section">
-        <h2>Why Partner With Us?</h2>
-        <div className="benefits-grid">
-          <div className="benefit-card">
-            <Package size={40} className="benefit-icon" />
-            <h3>Bulk Quantities</h3>
-            <p>Whether you're a restaurant, retailer, or distributor, we can supply the volume you need without compromising on quality.</p>
-          </div>
-          <div className="benefit-card">
-            <TrendingUp size={40} className="benefit-icon" />
-            <h3>Wholesale Discounts</h3>
-            <p>Enjoy exclusive wholesale pricing on every product in our catalog. Better margins mean better business for you.</p>
-          </div>
-          <div className="benefit-card">
-            <Phone size={40} className="benefit-icon" />
-            <h3>Dedicated Support</h3>
-            <p>Get personalized assistance, marketing materials, and support from our dedicated B2B team to help you succeed.</p>
+      <section className="bg-brand-50/50 py-14">
+        <div className="mx-auto max-w-(--container-page) px-6">
+          <h2 className="text-center font-display text-2xl font-bold text-brand-950 sm:text-3xl">Why Partner With Us?</h2>
+          <div className="mt-8 grid gap-5 sm:grid-cols-3">
+            <BenefitCard icon={<Package size={30} />} title="Bulk Quantities" desc="Whether you're a restaurant, retailer, or distributor, we can supply the volume you need without compromising on quality." />
+            <BenefitCard icon={<TrendingUp size={30} />} title="Wholesale Discounts" desc="Enjoy exclusive wholesale pricing on every product in our catalog. Better margins mean better business for you." />
+            <BenefitCard icon={<Phone size={30} />} title="Dedicated Support" desc="Get personalized assistance, marketing materials, and support from our dedicated B2B team to help you succeed." />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Contact Section */}
-      <div className="wholesale-contact-section">
-        <div className="contact-card">
-          <h2>Ready to Order?</h2>
-          <p>Contact us today for a custom quote, full product catalog, and more details on our wholesale program.</p>
-          <div className="contact-methods">
-            <div className="contact-method">
-              <Phone className="contact-icon" />
-              <span>+91 98765 43210</span>
-            </div>
-            <div className="contact-method">
-              <Mail className="contact-icon" />
-              <span>wholesale@rajasuvai.com</span>
-            </div>
+      <section className="py-14">
+        <div className="mx-auto max-w-lg rounded-3xl border border-black/5 bg-white p-8 text-center shadow-sm">
+          <h2 className="font-display text-2xl font-bold text-brand-950">Ready to Order?</h2>
+          <p className="mt-2 text-sm text-black/55">Contact us today for a custom quote, full product catalog, and more details on our wholesale program.</p>
+          <div className="mt-5 flex flex-col items-center gap-2 text-sm text-black/70 sm:flex-row sm:justify-center sm:gap-6">
+            <span className="flex items-center gap-2"><Phone size={16} className="text-brand-500" /> +91 98765 43210</span>
+            <span className="flex items-center gap-2"><Mail size={16} className="text-brand-500" /> wholesale@rajasuvai.com</span>
           </div>
-          <button className="inquire-button" onClick={() => window.location.href = '/contact'}>
+          <button
+            onClick={() => (window.location.href = '/contact')}
+            className="mt-6 rounded-full bg-brand-500 px-7 py-3 text-sm font-bold text-white hover:bg-brand-600"
+          >
             Inquire Now
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
+
+const BenefitCard: React.FC<{ icon: React.ReactNode; title: string; desc: string }> = ({ icon, title, desc }) => (
+  <div className="rounded-2xl bg-white p-6 text-center">
+    <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-brand-100 text-brand-600">{icon}</div>
+    <h3 className="mt-4 text-base font-bold text-brand-950">{title}</h3>
+    <p className="mt-1.5 text-sm text-black/55">{desc}</p>
+  </div>
+);
 
 export default Wholesale;

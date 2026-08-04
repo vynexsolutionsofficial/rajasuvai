@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useCart } from '../../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, Smartphone, CreditCard, Landmark } from 'lucide-react';
+import { ShieldCheck, Smartphone, CreditCard, Landmark, Lock } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
-import './checkout.css';
+import { Button } from '../../components/ui/Button';
+import { cn } from '../../lib/cn';
+import CheckoutStepper from './CheckoutStepper';
 
 const CheckoutPage: React.FC = () => {
   const { cart, cartTotal, clearCart } = useCart();
@@ -17,15 +19,12 @@ const CheckoutPage: React.FC = () => {
   const [manualUpiId, setManualUpiId] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Detect mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-
   const addressId = location.state?.addressId;
 
-  // Prices
   const safeCartTotal = cartTotal || 0;
   const shipping = 50;
-  const platformFeeRate = 0.015; 
+  const platformFeeRate = 0.015;
   const convenienceFee = Math.round((safeCartTotal + shipping) * platformFeeRate);
   const finalTotal = safeCartTotal + shipping + convenienceFee;
 
@@ -34,14 +33,23 @@ const CheckoutPage: React.FC = () => {
     { id: 'SBIN', name: 'SBI' },
     { id: 'ICIC', name: 'ICICI' },
     { id: 'AXIS', name: 'Axis' },
-    { id: 'KKBK', name: 'Kotak' }
+    { id: 'KKBK', name: 'Kotak' },
   ];
 
   const paymentMethods = [
-    { id: 'upi', label: 'UPI', sub: 'Pay by UPI (Google Pay, PhonePe, etc.)', icon: <Smartphone />, badge: 'INSTANT' },
-    { id: 'cards', label: 'Cards', sub: 'Pay with credit or debit card', icon: <CreditCard />, logos: ['visa', 'mastercard', 'rupay'] },
-    { id: 'netbanking', label: 'Netbanking', sub: 'Pay via any Indian bank', icon: <Landmark /> }
+    { id: 'upi', label: 'UPI', sub: 'Pay by UPI (Google Pay, PhonePe, etc.)', icon: <Smartphone size={20} />, badge: 'INSTANT' },
+    { id: 'cards', label: 'Cards', sub: 'Pay with credit or debit card', icon: <CreditCard size={20} /> },
+    { id: 'netbanking', label: 'Netbanking', sub: 'Pay via any Indian bank', icon: <Landmark size={20} /> },
   ];
+
+  const loadRazorpayScript = (src: string) =>
+    new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
 
   const handlePayment = async () => {
     if (selectedMethod === 'upi' && selectedSubMethod === 'manual' && !manualUpiId) {
@@ -59,8 +67,8 @@ const CheckoutPage: React.FC = () => {
       }
 
       const orderData = await api.post('/api/payments/create-order', {
-        items: cart.map(item => ({ product_id: item.id, quantity: item.quantity })),
-        address_id: addressId
+        items: cart.map((item) => ({ product_id: item.id, quantity: item.quantity })),
+        address_id: addressId,
       });
 
       if (!orderData.success || !orderData.razorOrder) {
@@ -82,7 +90,7 @@ const CheckoutPage: React.FC = () => {
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
             dbOrderId: orderData.dbOrderId,
-            method: selectedMethod + (selectedMethod === 'upi' ? `_${selectedSubMethod}` : selectedMethod === 'netbanking' ? `_${selectedBank}` : '')
+            method: selectedMethod + (selectedMethod === 'upi' ? `_${selectedSubMethod}` : selectedMethod === 'netbanking' ? `_${selectedBank}` : ''),
           });
 
           if (verifyData.success) {
@@ -90,12 +98,12 @@ const CheckoutPage: React.FC = () => {
             navigate('/order-confirmation', {
               state: {
                 orderId: String(orderData.dbOrderId),
-                items: cart.map(item => ({ name: item.name, quantity: item.quantity, price: item.price || 0 })),
+                items: cart.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price || 0 })),
                 subtotal: safeCartTotal,
                 shipping,
                 convenienceFee,
-                total: finalTotal
-              }
+                total: finalTotal,
+              },
             });
           } else {
             showToast('Payment completed. Confirmation via email shortly.', 'info');
@@ -108,15 +116,14 @@ const CheckoutPage: React.FC = () => {
           email: 'support@suvai.com',
           contact: '9999999999',
           method: selectedMethod === 'upi' ? 'upi' : selectedMethod,
-          bank: selectedMethod === 'netbanking' ? selectedBank : undefined
+          bank: selectedMethod === 'netbanking' ? selectedBank : undefined,
         },
-        theme: { color: '#e65c00' }
+        theme: { color: '#e67e00' },
       };
 
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.open();
-
-    } catch (err: any) {
+    } catch (err) {
       console.error('PAYMENT_ERROR:', err);
       showToast('A technical error occurred. Please try again.', 'error');
     } finally {
@@ -124,83 +131,82 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const loadRazorpayScript = (src: string) => {
-    return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = src;
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-
   const upiString = `upi://pay?pa=suvai@upi&pn=Suvai&am=${finalTotal}&cu=INR`;
 
   return (
-    <div className="checkout-page-container">
-      <div className="checkout-main-card">
-        <h1 className="checkout-title">SECURE PAYMENT</h1>
-        
-        <div className="checkout-badge-row">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" alt="Razorpay" className="brand-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="brand-logo" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Rupay-Logo.png" alt="Rupay" className="brand-logo" />
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
+      <CheckoutStepper current={3} />
+
+      <div className="rounded-2xl border border-black/5 bg-white p-5 sm:p-8">
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-xl font-bold text-brand-950 sm:text-2xl">Secure Payment</h1>
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-fresh-600">
+            <ShieldCheck size={16} /> 100% Secure
+          </div>
         </div>
 
-        <div className="checkout-split-view">
-          <div className="checkout-left">
-            <div className="methods-list">
+        <div className="mt-6 grid gap-6 lg:grid-cols-5">
+          {/* Methods */}
+          <div className="lg:col-span-3">
+            <div className="space-y-2">
               {paymentMethods.map((method) => (
                 <React.Fragment key={method.id}>
-                  <div 
-                    className={`payment-method-item ${selectedMethod === method.id ? 'active' : ''}`}
+                  <button
                     onClick={() => setSelectedMethod(method.id)}
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-xl border-2 p-3.5 text-left transition-colors',
+                      selectedMethod === method.id ? 'border-brand-500 bg-brand-50/40' : 'border-black/10 hover:border-black/20'
+                    )}
                   >
-                    <div className="method-icon-wrap">{method.icon}</div>
-                    <div className="method-info">
-                      <div className="method-label-row">
-                          <span className="method-label">{method.label}</span>
-                          {method.badge && <span className="method-badge">{method.badge}</span>}
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500">{method.icon}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-brand-950">{method.label}</span>
+                        {method.badge && <span className="rounded-full bg-fresh-100 px-2 py-0.5 text-[10px] font-bold text-fresh-700">{method.badge}</span>}
                       </div>
-                      <span className="method-subtitle">{method.sub}</span>
+                      <span className="text-xs text-black/50">{method.sub}</span>
                     </div>
-                  </div>
+                  </button>
 
                   {method.id === 'upi' && selectedMethod === 'upi' && (
-                    <div className="upi-app-selection-expanded">
-                      <div className="sub-pills-row">
-                        {['gpay', 'phonepe', 'paytm', 'manual'].map(sub => (
-                          <button 
-                            key={sub} 
-                            className={`upi-app-pill ${selectedSubMethod === sub ? 'active' : ''}`} 
+                    <div className="rounded-xl bg-black/[0.02] p-3">
+                      <div className="flex flex-wrap gap-2">
+                        {['gpay', 'phonepe', 'paytm', 'manual'].map((sub) => (
+                          <button
+                            key={sub}
                             onClick={() => setSelectedSubMethod(sub)}
+                            className={cn(
+                              'rounded-full border px-3.5 py-1.5 text-xs font-semibold capitalize',
+                              selectedSubMethod === sub ? 'border-brand-500 bg-brand-500 text-white' : 'border-black/10 text-black/60'
+                            )}
                           >
-                            {sub === 'manual' ? '•••' : sub === 'phonepe' ? 'Pe' : sub.charAt(0).toUpperCase() + sub.slice(1)}
+                            {sub === 'manual' ? 'Other UPI' : sub === 'phonepe' ? 'PhonePe' : sub}
                           </button>
                         ))}
                       </div>
                       {selectedSubMethod === 'manual' && (
-                        <div className="manual-upi-input-container">
-                           <input 
-                              type="text" 
-                              placeholder="user@upi" 
-                              value={manualUpiId}
-                              onChange={(e) => setManualUpiId(e.target.value)}
-                              className="manual-upi-input"
-                           />
-                        </div>
+                        <input
+                          type="text"
+                          placeholder="user@upi"
+                          value={manualUpiId}
+                          onChange={(e) => setManualUpiId(e.target.value)}
+                          className="mt-3 h-10 w-full rounded-lg border border-black/10 px-3 text-sm focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                        />
                       )}
                     </div>
                   )}
 
                   {method.id === 'netbanking' && selectedMethod === 'netbanking' && (
-                    <div className="upi-app-selection-expanded">
-                      <div className="sub-pills-row grid">
-                        {popularBanks.map(bank => (
-                          <button 
-                            key={bank.id} 
-                            className={`upi-app-pill ${selectedBank === bank.id ? 'active' : ''}`} 
+                    <div className="rounded-xl bg-black/[0.02] p-3">
+                      <div className="flex flex-wrap gap-2">
+                        {popularBanks.map((bank) => (
+                          <button
+                            key={bank.id}
                             onClick={() => setSelectedBank(bank.id)}
+                            className={cn(
+                              'rounded-full border px-3.5 py-1.5 text-xs font-semibold',
+                              selectedBank === bank.id ? 'border-brand-500 bg-brand-500 text-white' : 'border-black/10 text-black/60'
+                            )}
                           >
                             {bank.name}
                           </button>
@@ -213,53 +219,54 @@ const CheckoutPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="checkout-right">
-            <div className="payment-action-card">
+          {/* Summary / action */}
+          <div className="lg:col-span-2">
+            <div className="rounded-xl border border-black/5 bg-brand-50/30 p-5">
               {selectedMethod === 'upi' ? (
-                <div className="qr-checkout-box">
-                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiString)}`} alt="QR" className="qr-code-img" />
-                    <p className="scan-primary">{isMobile ? 'Pay using App' : 'Scan to Pay'}</p>
+                <div className="flex flex-col items-center gap-2 pb-4">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiString)}`}
+                    alt="UPI QR Code"
+                    className="size-32 rounded-lg bg-white p-1.5"
+                  />
+                  <p className="text-sm font-semibold text-brand-950">{isMobile ? 'Pay using App' : 'Scan to Pay'}</p>
                 </div>
               ) : selectedMethod === 'cards' ? (
-                <div className="qr-checkout-box card-preview">
-                    <div className="card-logos-row">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Rupay-Logo.png" alt="Rupay" />
-                    </div>
-                    <p className="scan-primary">Enter card details on next step</p>
-                    <p className="scan-secondary">Secured by 256-bit encryption</p>
+                <div className="flex flex-col items-center gap-2 pb-4 text-center">
+                  <div className="flex gap-2">
+                    {['VISA', 'Mastercard', 'RuPay'].map((brand) => (
+                      <span key={brand} className="rounded-md border border-black/10 bg-white px-2.5 py-1 text-[10px] font-bold text-black/60">{brand}</span>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-sm font-semibold text-brand-950">Enter card details on next step</p>
+                  <p className="text-xs text-black/45">Secured by 256-bit encryption</p>
                 </div>
               ) : (
-                <div className="qr-checkout-box bank-preview">
-                    <h3>{popularBanks.find(b => b.id === selectedBank)?.name} Bank</h3>
-                    <p className="scan-primary">You will be redirected to your bank</p>
+                <div className="flex flex-col items-center gap-1 pb-4 text-center">
+                  <h3 className="text-sm font-bold text-brand-950">{popularBanks.find((b) => b.id === selectedBank)?.name} Bank</h3>
+                  <p className="text-sm text-black/55">You will be redirected to your bank</p>
                 </div>
               )}
 
-              <div className="price-summary-breakdown">
-                <div className="summary-row"><span>Items</span><span>₹{safeCartTotal.toLocaleString()}</span></div>
-                <div className="summary-row"><span>Shipping</span><span>₹{shipping}</span></div>
-                <div className="summary-row highlight"><span>Convenience (1.5%)</span><span>₹{convenienceFee}</span></div>
-                <div className="summary-row total"><span>Total</span><span>₹{finalTotal.toLocaleString()}</span></div>
+              <div className="space-y-2 border-t border-black/10 pt-4 text-sm">
+                <div className="flex justify-between text-black/60"><span>Items</span><span>₹{safeCartTotal.toLocaleString()}</span></div>
+                <div className="flex justify-between text-black/60"><span>Shipping</span><span>₹{shipping}</span></div>
+                <div className="flex justify-between text-black/60"><span>Convenience (1.5%)</span><span>₹{convenienceFee}</span></div>
+                <div className="flex justify-between border-t border-black/10 pt-2 text-base font-extrabold text-brand-950">
+                  <span>Total</span><span>₹{finalTotal.toLocaleString()}</span>
+                </div>
               </div>
 
-              <button className={`btn-pay-secure ${loading ? 'loading' : ''}`} onClick={handlePayment} disabled={loading}>
-                {loading ? "..." : `PAY ₹${finalTotal.toLocaleString()}`}
-              </button>
+              <Button size="lg" className="mt-4 w-full" onClick={handlePayment} disabled={loading} loading={loading}>
+                {loading ? 'Processing...' : `Pay ₹${finalTotal.toLocaleString()}`}
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="checkout-trust-footer">
-            <div className="trust-badge">
-                <ShieldCheck size={18} />
-                <span>100% Secure</span>
-            </div>
-            <div className="security-badges">
-                <span className="pci-badge">PCI DSS</span>
-                <span className="ssl-badge">🔒 SSL</span>
-            </div>
+        <div className="mt-6 flex items-center justify-center gap-4 border-t border-black/5 pt-5 text-xs text-black/45">
+          <span className="flex items-center gap-1"><Lock size={12} /> PCI DSS</span>
+          <span>SSL Secured</span>
         </div>
       </div>
     </div>

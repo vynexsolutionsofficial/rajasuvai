@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand */
+  --color-brand-50: #fff7ec;
+  --color-brand-100: #ffecd3;
+  --color-brand-200: #ffd5a5;
+  --color-brand-300: #ffb86d;
+  --color-brand-400: #ff9433;
+  --color-brand-500: #e67e00;
+  --color-brand-600: #cc6a00;
+  --color-brand-700: #a3540a;
+  --color-brand-800: #82440f;
+  --color-brand-900: #6b3810;
+  --color-brand-950: #0f0a05;
+
+  /* Fresh/success accent — grocery apps lean on green for "in stock", "organic", savings */
+  --color-fresh-50: #f0fdf4;
+  --color-fresh-100: #dcfce7;
+  --color-fresh-500: #16a34a;
+  --color-fresh-600: #15803d;
+  --color-fresh-700: #166534;
+
+  /* Semantic */
+  --color-warning-500: #f59e0b;
+  --color-error-50: #fef2f2;
+  --color-error-500: #dc2626;
+  --color-error-600: #b91c1c;
+
+  /* Neutrals used for text/surfaces beyond Tailwind's default gray */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f7f7f5;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Outfit', var(--font-sans);
+
+  /* Layout */
+  --breakpoint-xs: 22.5rem;
+  --container-page: 90rem;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-brand-950);
+    background-color: var(--color-surface-alt);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}

@@ -1,37 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { supabase } from '../../supabaseClient';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const UserProtectedRoute: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
-      setLoading(false);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAuth();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d0f' }}>
-        <Loader2 className="animate-spin" size={48} color="#f9a826" />
+      <div className="flex h-screen items-center justify-center bg-brand-950">
+        <Loader2 className="size-12 animate-spin text-brand-500" />
       </div>
     );
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
+  return user ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 export default UserProtectedRoute;

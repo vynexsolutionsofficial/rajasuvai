@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { SearchX } from 'lucide-react';
 import { api } from '../../services/api';
 import ShopProductCard from './ShopProductCard';
-import './ShopProductGrid.css';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { EmptyState } from '../../components/ui/EmptyState';
 
 interface Product {
   id: number;
@@ -58,6 +60,8 @@ const ShopProductGrid: React.FC<ShopProductGridProps> = ({
         }
       } catch (err) {
         console.error('Error fetching products:', err);
+        setProducts([]);
+        onTotalItems(0);
       } finally {
         setLoading(false);
       }
@@ -68,24 +72,32 @@ const ShopProductGrid: React.FC<ShopProductGridProps> = ({
 
   if (loading) {
     return (
-      <div className="shop-grid-loading">
-        <div className="spinner"></div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="overflow-hidden rounded-2xl border border-black/5 bg-white">
+            <Skeleton className="aspect-square rounded-none" />
+            <div className="space-y-2 p-3.5">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (products.length === 0) {
     return (
-      <div className="shop-empty-state">
-        <span style={{ fontSize: '3rem' }}>🔍</span>
-        <h3>No products found</h3>
-        <p>{search ? `No results for "${search}". Try a different search term.` : 'No products match the selected filters.'}</p>
-      </div>
+      <EmptyState
+        icon={<SearchX size={28} />}
+        title="No products found"
+        description={search ? `No results for "${search}". Try a different search term.` : 'No products match the selected filters.'}
+      />
     );
   }
 
   return (
-    <div className="shop-product-grid">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
         <ShopProductCard key={product.id} {...product} />
       ))}

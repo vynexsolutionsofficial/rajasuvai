@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 import { api } from '../services/api';
-import { supabase } from '../supabaseClient';
+import { useAuth } from './AuthContext';
 
 interface CartItem {
   id: number;
@@ -27,36 +27,32 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading: authLoading } = useAuth();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const previousUserId = useRef<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchCartFromDB();
-      } else {
-        const local = localStorage.getItem('rajasuvai_cart');
-        if (local) setCart(JSON.parse(local));
-        setLoading(false);
-      }
-    });
+    if (authLoading) return;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const newUser = session?.user ?? null;
-      if (!user && newUser) {
-        syncGuestCart();
-      } else if (user && !newUser) {
-        setCart([]);
-        localStorage.removeItem('rajasuvai_cart');
-      }
-      setUser(newUser);
-    });
+    const wasLoggedIn = previousUserId.current !== null;
+    const isLoggedIn = !!user;
+    previousUserId.current = user?.id ?? null;
 
-    return () => subscription.unsubscribe();
-  }, [user]);
+    if (!wasLoggedIn && isLoggedIn) {
+      syncGuestCart();
+    } else if (wasLoggedIn && !isLoggedIn) {
+      setCart([]);
+      localStorage.removeItem('rajasuvai_cart');
+    } else if (isLoggedIn) {
+      fetchCartFromDB();
+    } else {
+      const local = localStorage.getItem('rajasuvai_cart');
+      if (local) setCart(JSON.parse(local));
+      setLoading(false);
+    }
+  }, [user, authLoading]);
 
   const fetchCartFromDB = async () => {
     try {

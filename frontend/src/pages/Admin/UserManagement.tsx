@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Search,
-  Loader2,
-  Mail,
-  Phone,
-  ShoppingBag,
-  Calendar,
-  Shield,
-  ShieldCheck,
-  User as UserIcon,
-  Eye,
-  UserX,
-  UserCheck,
-  Download,
-  X
+  Loader2, Mail, Phone, ShoppingBag, Calendar, Shield, ShieldCheck,
+  User as UserIcon, Eye, UserX, UserCheck, Download,
 } from 'lucide-react';
-import './UserManagement.css';
-import './ProductManagement.css';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
+import { DataTable } from '../../components/ui/DataTable';
+import { Sheet } from '../../components/ui/Sheet';
+import { Button } from '../../components/ui/Button';
+import { cn } from '../../lib/cn';
 
 interface User {
   id: number;
@@ -46,10 +36,7 @@ const exportToCsv = (filename: string, rows: Record<string, any>[]) => {
     const s = v == null ? '' : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const csv = [
-    headers.join(','),
-    ...rows.map(r => headers.map(h => escape(r[h])).join(','))
-  ].join('\n');
+  const csv = [headers.join(','), ...rows.map((r) => headers.map((h) => escape(r[h])).join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -58,6 +45,9 @@ const exportToCsv = (filename: string, rows: Record<string, any>[]) => {
   link.click();
   URL.revokeObjectURL(url);
 };
+
+const orderStatusColor = (status: string) =>
+  status === 'Delivered' ? 'border-fresh-500' : status === 'Cancelled' ? 'border-error-500' : 'border-brand-500';
 
 const UserManagement: React.FC = () => {
   const { showToast } = useToast();
@@ -68,10 +58,6 @@ const UserManagement: React.FC = () => {
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [userOrders, setUserOrders] = useState<UserOrder[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -85,13 +71,17 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const toggleRole = async (user: User) => {
     const newRole = user.role === 'admin' ? 'customer' : 'admin';
     if (!window.confirm(`${newRole === 'admin' ? 'Promote' : 'Demote'} ${user.name} to ${newRole}?`)) return;
     setUpdatingId(user.id);
     try {
       await api.patch(`/api/admin/users/${user.id}/role`, { role: newRole });
-      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u));
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, role: newRole } : u)));
       showToast(`Role updated to ${newRole}`, 'success');
     } catch (err: any) {
       showToast(err.message || 'Failed to update role', 'error');
@@ -107,7 +97,7 @@ const UserManagement: React.FC = () => {
     setUpdatingId(user.id);
     try {
       await api.patch(`/api/admin/users/${user.id}/status`, { is_active: newStatus });
-      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, is_active: newStatus } : u));
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, is_active: newStatus } : u)));
       showToast(`Account ${newStatus ? 'enabled' : 'disabled'}`, 'success');
     } catch (err: any) {
       showToast(err.message || 'Failed to update status', 'error');
@@ -131,184 +121,111 @@ const UserManagement: React.FC = () => {
   };
 
   const handleExportCsv = () => {
-    const rows = filteredUsers.map(u => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-      phone: u.phone || '',
-      role: u.role,
-      status: u.is_active ? 'active' : 'disabled',
-      orders: u.order_count,
-      joined: new Date(u.created_at).toISOString().split('T')[0]
+    const rows = filteredUsers.map((u) => ({
+      id: u.id, name: u.name, email: u.email, phone: u.phone || '', role: u.role,
+      status: u.is_active ? 'active' : 'disabled', orders: u.order_count,
+      joined: new Date(u.created_at).toISOString().split('T')[0],
     }));
     exportToCsv(`suvai-users-${new Date().toISOString().split('T')[0]}.csv`, rows);
     showToast(`Exported ${rows.length} users`, 'success');
   };
 
-  const filteredUsers = users.filter(u =>
-    u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users.filter((u) => u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || u.email?.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className="user-mgmt">
-      <div className="admin-toolbar">
-        <div style={{ position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'rgba(255,255,255,0.4)' }} />
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            className="search-input"
-            style={{ paddingLeft: '2.5rem', width: '300px' }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <button className="btn-secondary" onClick={handleExportCsv} disabled={filteredUsers.length === 0}>
-          <Download size={16} style={{ marginRight: '0.4rem' }} />
-          Export CSV
-        </button>
-      </div>
-
-      <div className="admin-table-container">
-        {loading && users.length === 0 ? (
-          <div style={{ padding: '4rem', textAlign: 'center' }}>
-            <Loader2 className="animate-spin" size={32} />
-            <p style={{ marginTop: '1rem', color: 'rgba(255,255,255,0.4)' }}>Loading users...</p>
-          </div>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Customer Info</th>
-                <th>Contact</th>
-                <th>Orders</th>
-                <th>Joined</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id} style={{ opacity: user.is_active ? 1 : 0.45 }}>
-                  <td>
-                    <div className="user-info-cell">
-                      <div className="user-avatar-mini">{user.name?.charAt(0) || <UserIcon size={16}/>}</div>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{user.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>UID: #{user.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="contact-info">
-                      <div className="contact-item"><Mail size={14} /> {user.email}</div>
-                      <div className="contact-item"><Phone size={14} /> {user.phone || 'N/A'}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="stats-pill">
-                      <ShoppingBag size={14} />
-                      {user.order_count} Orders
-                    </div>
-                  </td>
-                  <td>
-                    <div className="joined-date">
-                      <Calendar size={14} />
-                      {new Date(user.created_at).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td>
-                    <div className={`role-badge ${user.role}`}>
-                      {user.role === 'admin' ? <ShieldCheck size={12} /> : <Shield size={12} />}
-                      {user.role}
-                    </div>
-                  </td>
-                  <td>
-                    <div className={`status-pill ${user.is_active ? 'good' : 'out'}`}>
-                      {user.is_active ? 'Active' : 'Disabled'}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button
-                        className="btn-icon"
-                        onClick={() => viewUserOrders(user)}
-                        title="View Orders"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        className="btn-icon"
-                        onClick={() => toggleRole(user)}
-                        disabled={updatingId === user.id}
-                        title={user.role === 'admin' ? 'Demote to Customer' : 'Promote to Admin'}
-                      >
-                        {updatingId === user.id ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={16} />}
-                      </button>
-                      <button
-                        className="btn-icon delete"
-                        onClick={() => toggleStatus(user)}
-                        disabled={updatingId === user.id}
-                        title={user.is_active ? 'Disable Account' : 'Enable Account'}
-                      >
-                        {user.is_active ? <UserX size={16} /> : <UserCheck size={16} />}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {viewingUser && (
-        <div className="modal-overlay" onClick={() => setViewingUser(null)}>
-          <div className="admin-modal" style={{ width: '700px' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-              <h2>Orders by {viewingUser.name}</h2>
-              <X size={24} onClick={() => setViewingUser(null)} style={{ cursor: 'pointer' }} />
-            </div>
-
-            {ordersLoading ? (
-              <div style={{ padding: '3rem', textAlign: 'center' }}>
-                <Loader2 className="animate-spin" size={32} />
+    <div className="space-y-5">
+      <DataTable
+        data={filteredUsers}
+        rowKey={(u) => u.id}
+        loading={loading && users.length === 0}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by name or email..."
+        emptyTitle="No users found"
+        actions={<Button variant="outline" size="sm" onClick={handleExportCsv} disabled={filteredUsers.length === 0}><Download size={15} /> Export CSV</Button>}
+        columns={[
+          {
+            header: 'Customer',
+            render: (u) => (
+              <div className={cn('flex items-center gap-3', !u.is_active && 'opacity-45')}>
+                <div className="flex size-9 items-center justify-center rounded-full bg-brand-100 text-sm font-bold text-brand-700">
+                  {u.name?.charAt(0) || <UserIcon size={14} />}
+                </div>
+                <div>
+                  <div className="font-semibold text-brand-950">{u.name}</div>
+                  <div className="text-xs text-black/40">UID: #{u.id}</div>
+                </div>
               </div>
-            ) : userOrders.length === 0 ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>
-                No orders yet.
+            ),
+          },
+          {
+            header: 'Contact',
+            render: (u) => (
+              <div className="space-y-1 text-xs text-black/60">
+                <div className="flex items-center gap-1.5"><Mail size={12} /> {u.email}</div>
+                <div className="flex items-center gap-1.5"><Phone size={12} /> {u.phone || 'N/A'}</div>
               </div>
-            ) : (
-              <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                {userOrders.map(order => (
-                  <div key={order.id} style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    padding: '1rem 1.25rem',
-                    borderRadius: '12px',
-                    marginBottom: '0.75rem',
-                    borderLeft: `3px solid ${order.status === 'Delivered' ? '#4ade80' : order.status === 'Cancelled' ? '#ef4444' : '#f9a826'}`
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <div style={{ fontWeight: 700 }}>#{order.id}</div>
-                      <div className={`status-badge status-${order.status.toLowerCase()}`}>{order.status}</div>
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem' }}>
-                      {new Date(order.created_at).toLocaleString()} · ₹{order.total_price}
-                    </div>
-                    {order.order_items && order.order_items.length > 0 && (
-                      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)' }}>
-                        {order.order_items.map(i => `${i.products?.name || 'Item'} × ${i.quantity}`).join(' · ')}
-                      </div>
-                    )}
+            ),
+          },
+          { header: 'Orders', render: (u) => <span className="flex items-center gap-1.5 text-sm"><ShoppingBag size={13} className="text-brand-500" /> {u.order_count}</span> },
+          { header: 'Joined', render: (u) => <span className="flex items-center gap-1.5 text-sm"><Calendar size={13} className="text-black/35" /> {new Date(u.created_at).toLocaleDateString()}</span> },
+          {
+            header: 'Role',
+            render: (u) => (
+              <span className={cn('flex w-fit items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold capitalize', u.role === 'admin' ? 'bg-brand-100 text-brand-700' : 'bg-black/5 text-black/55')}>
+                {u.role === 'admin' ? <ShieldCheck size={12} /> : <Shield size={12} />} {u.role}
+              </span>
+            ),
+          },
+          {
+            header: 'Status',
+            render: (u) => (
+              <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', u.is_active ? 'bg-fresh-100 text-fresh-700' : 'bg-error-50 text-error-600')}>
+                {u.is_active ? 'Active' : 'Disabled'}
+              </span>
+            ),
+          },
+          {
+            header: 'Actions',
+            render: (user) => (
+              <div className="flex gap-1.5">
+                <button onClick={() => viewUserOrders(user)} title="View Orders" className="flex size-8 items-center justify-center rounded-lg text-black/50 hover:bg-black/5"><Eye size={15} /></button>
+                <button onClick={() => toggleRole(user)} disabled={updatingId === user.id} title={user.role === 'admin' ? 'Demote to Customer' : 'Promote to Admin'} className="flex size-8 items-center justify-center rounded-lg text-black/50 hover:bg-black/5">
+                  {updatingId === user.id ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={15} />}
+                </button>
+                <button onClick={() => toggleStatus(user)} disabled={updatingId === user.id} title={user.is_active ? 'Disable Account' : 'Enable Account'} className="flex size-8 items-center justify-center rounded-lg text-error-600 hover:bg-error-50">
+                  {user.is_active ? <UserX size={15} /> : <UserCheck size={15} />}
+                </button>
+              </div>
+            ),
+          },
+        ]}
+      />
+
+      <Sheet open={!!viewingUser} onClose={() => setViewingUser(null)} title={`Orders by ${viewingUser?.name || ''}`} side="right">
+        <div className="p-5">
+          {ordersLoading ? (
+            <div className="flex justify-center py-16"><Loader2 className="size-8 animate-spin text-brand-500" /></div>
+          ) : userOrders.length === 0 ? (
+            <p className="py-16 text-center text-sm text-black/40">No orders yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {userOrders.map((order) => (
+                <div key={order.id} className={cn('rounded-xl border-l-4 bg-black/[0.02] p-4', orderStatusColor(order.status))}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-brand-950">#{order.id}</span>
+                    <span className="text-xs font-semibold text-black/50">{order.status}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <div className="mt-1 text-xs text-black/45">{new Date(order.created_at).toLocaleString()} · ₹{order.total_price}</div>
+                  {order.order_items && order.order_items.length > 0 && (
+                    <div className="mt-1.5 text-xs text-black/55">{order.order_items.map((i) => `${i.products?.name || 'Item'} × ${i.quantity}`).join(' · ')}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </Sheet>
     </div>
   );
 };

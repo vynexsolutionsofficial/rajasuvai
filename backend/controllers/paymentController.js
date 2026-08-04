@@ -114,7 +114,11 @@ export const verifyPayment = async (req, res) => {
  * Webhook Handler (Fail-safe)
  */
 export const handleWebhook = async (req, res) => {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'raj_suvai_secret';
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error('RAZORPAY_WEBHOOK_SECRET is not configured; rejecting webhook.');
+    return res.status(500).send('Webhook not configured');
+  }
   const signature = req.headers['x-razorpay-signature'];
 
   const expectedSignature = crypto

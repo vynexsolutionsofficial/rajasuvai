@@ -17,11 +17,29 @@ import productRoutes from './routes/productRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 
+// --- ENV VALIDATION (fail fast with a clear message instead of surfacing
+// confusing errors deep inside a request handler later) ---
+const REQUIRED_ENV_VARS = [
+  'SUPABASE_URL',
+  'SUPABASE_ANON_KEY',
+  'RAZORPAY_KEY_ID',
+  'RAZORPAY_KEY_SECRET',
+  'GMAIL_USER',
+  'GMAIL_APP_PASSWORD'
+];
+const missingEnvVars = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
+if (missingEnvVars.length > 0) {
+  console.error(`[Startup] Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  console.error('[Startup] Copy backend/.env.example to backend/.env and fill in the values.');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001; // Changed to 3001 to avoid collision with HackFlow
 
 app.use(cors({
   origin: [
+    'http://localhost:3000',
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:4173',
@@ -195,23 +213,9 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// --- PRODUCT ROUTES (PUBLIC) ---
-
-app.get('/api/products', async (req, res) => {
-  const { data, error } = await supabase
-    .from('products')
-    .select('*, inventory(quantity)');
-
-  if (error) {
-    return res.status(500).json({ error: error.message });
-  }
-
-  res.json(data);
-});
-
 // --- PROTECTED ADMIN ROUTES ---
 
-import { authenticateToken, requireAdmin } from './authMiddleware.js';
+import { authenticateToken, requireAdmin, optionalAuth } from './authMiddleware.js';
 
 // 2. Categories
 app.get('/api/admin/categories', authenticateToken, requireAdmin, async (req, res) => {
@@ -777,21 +781,25 @@ app.patch('/api/users/password', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/api/support', authenticateToken, async (req, res) => {
+app.post('/api/support', optionalAuth, async (req, res) => {
   const { order_id, subject, message } = req.body;
   if (!subject || !message) {
     return res.status(400).json({ error: 'Subject and message are required' });
   }
   try {
-    const { data: client } = await supabase
-      .from('clients')
-      .select('id')
-      .ilike('email', req.user.email)
-      .maybeSingle();
+    let clientId = null;
+    if (req.user) {
+      const { data: client } = await supabase
+        .from('clients')
+        .select('id')
+        .ilike('email', req.user.email)
+        .maybeSingle();
+      clientId = client?.id || null;
+    }
 
     const { data: ticket, error } = await supabase
       .from('support_tickets')
-      .insert([{ client_id: client?.id || null, order_id: order_id || null, subject, message }])
+      .insert([{ client_id: clientId, order_id: order_id || null, subject, message }])
       .select()
       .single();
 
@@ -802,7 +810,7 @@ app.post('/api/support', authenticateToken, async (req, res) => {
       await sendEmail(
         process.env.GMAIL_USER,
         `Support Ticket #${ticket.id}: ${subject}`,
-        `<p><b>From:</b> ${req.user.email}</p><p><b>Order:</b> ${order_id || 'N/A'}</p><p><b>Subject:</b> ${subject}</p><p>${message}</p>`
+        `<p><b>From:</b> ${req.user?.email || 'Guest (see message for contact details)'}</p><p><b>Order:</b> ${order_id || 'N/A'}</p><p><b>Subject:</b> ${subject}</p><p>${message}</p>`
       );
     }
 

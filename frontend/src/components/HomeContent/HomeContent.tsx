@@ -7,7 +7,7 @@ import BrandBenefitsRow from './BrandBenefitsRow/BrandBenefitsRow';
 
 const HomeContent: React.FC = () => {
   return (
-    <div className="home-content">
+    <div>
       <BrandBenefitsRow />
       <Categories />
       <FeaturedProducts />

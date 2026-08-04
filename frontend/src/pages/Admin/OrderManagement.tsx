@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Eye,
-  CheckCircle,
-  Truck,
-  Clock,
-  Search,
-  X,
-  Loader2,
-  Calendar,
-  User,
-  Phone,
-  Mail,
-  Package,
-  MapPin,
-  AlertCircle,
-  Download
+  Eye, CheckCircle, Truck, Clock, Loader2, Calendar, User, Phone, Mail,
+  Package, MapPin, AlertCircle, Download,
 } from 'lucide-react';
-import './ProductManagement.css';
 import { api } from '../../services/api';
 import { useToast } from '../../context/ToastContext';
+import { DataTable } from '../../components/ui/DataTable';
+import { Sheet } from '../../components/ui/Sheet';
+import { Button } from '../../components/ui/Button';
+import { cn } from '../../lib/cn';
 
 const exportToCsv = (filename: string, rows: Record<string, any>[]) => {
   if (rows.length === 0) return;
@@ -27,10 +17,7 @@ const exportToCsv = (filename: string, rows: Record<string, any>[]) => {
     const s = v == null ? '' : String(v);
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const csv = [
-    headers.join(','),
-    ...rows.map(r => headers.map(h => escape(r[h])).join(','))
-  ].join('\n');
+  const csv = [headers.join(','), ...rows.map((r) => headers.map((h) => escape(r[h])).join(','))].join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -41,6 +28,22 @@ const exportToCsv = (filename: string, rows: Record<string, any>[]) => {
 };
 
 const ORDER_STATUSES = ['Pending', 'Packed', 'Shipped', 'Delivered', 'Cancelled'] as const;
+
+const statusStyles: Record<string, string> = {
+  Pending: 'bg-amber-100 text-amber-700',
+  Packed: 'bg-purple-100 text-purple-700',
+  Shipped: 'bg-blue-100 text-blue-700',
+  Delivered: 'bg-fresh-100 text-fresh-700',
+  Cancelled: 'bg-error-50 text-error-600',
+};
+
+const statusIcons: Record<string, React.ReactNode> = {
+  Pending: <Clock size={13} />,
+  Packed: <Package size={13} />,
+  Shipped: <Truck size={13} />,
+  Delivered: <CheckCircle size={13} />,
+  Cancelled: <AlertCircle size={13} />,
+};
 
 interface OrderItem {
   id: number;
@@ -56,12 +59,7 @@ interface Order {
   status: 'Pending' | 'Packed' | 'Shipped' | 'Delivered' | 'Cancelled';
   total_price: number;
   created_at: string;
-  clients: {
-    name: string;
-    email: string;
-    phone: string;
-    address?: string;
-  };
+  clients: { name: string; email: string; phone: string; address?: string };
   order_items?: OrderItem[];
 }
 
@@ -77,10 +75,6 @@ const OrderManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [bulkSaving, setBulkSaving] = useState(false);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -92,6 +86,10 @@ const OrderManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const fetchOrderDetails = async (id: number) => {
     setModalLoading(true);
@@ -109,12 +107,9 @@ const OrderManagement: React.FC = () => {
   const updateStatus = async (id: number, newStatus: string) => {
     try {
       const data = await api.post(`/api/admin/orders/${id}/status`, { status: newStatus });
-      
       if (!data.error) {
         fetchOrders();
-        if (selectedOrder?.id === id) {
-          fetchOrderDetails(id);
-        }
+        if (selectedOrder?.id === id) fetchOrderDetails(id);
       } else {
         showToast(data.error || 'Failed to update status', 'error');
       }
@@ -123,16 +118,14 @@ const OrderManagement: React.FC = () => {
     }
   };
 
-  const filteredOrders = orders.filter(o => {
-    const matchesSearch =
-      o.clients?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.id.toString().includes(searchQuery);
+  const filteredOrders = orders.filter((o) => {
+    const matchesSearch = o.clients?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || o.id.toString().includes(searchQuery);
     const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const toggleSelected = (id: number) => {
-    setSelectedIds(prev => {
+    setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -141,11 +134,7 @@ const OrderManagement: React.FC = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredOrders.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredOrders.map(o => o.id)));
-    }
+    setSelectedIds(selectedIds.size === filteredOrders.length ? new Set() : new Set(filteredOrders.map((o) => o.id)));
   };
 
   const bulkUpdateStatus = async (status: string) => {
@@ -165,236 +154,159 @@ const OrderManagement: React.FC = () => {
   };
 
   const handleExportCsv = () => {
-    const rows = filteredOrders.map(o => ({
+    const rows = filteredOrders.map((o) => ({
       order_id: o.id,
       customer: o.clients?.name || '',
       email: o.clients?.email || '',
       phone: o.clients?.phone || '',
       status: o.status,
       total: o.total_price,
-      created_at: new Date(o.created_at).toISOString()
+      created_at: new Date(o.created_at).toISOString(),
     }));
     exportToCsv(`suvai-orders-${new Date().toISOString().split('T')[0]}.csv`, rows);
     showToast(`Exported ${rows.length} orders`, 'success');
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Pending': return <Clock size={16} />;
-      case 'Packed': return <Package size={16} />;
-      case 'Shipped': return <Truck size={16} />;
-      case 'Delivered': return <CheckCircle size={16} />;
-      case 'Cancelled': return <AlertCircle size={16} />;
-      default: return <Clock size={16} />;
-    }
-  };
-
   return (
-    <div className="order-mgmt">
-      <div className="admin-toolbar" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'rgba(255,255,255,0.4)' }} />
-            <input
-              type="text"
-              placeholder="Search orders or customers..."
-              className="search-input"
-              style={{ paddingLeft: '2.5rem', width: '280px' }}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <select
-            className="search-input"
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            style={{ width: 'auto', minWidth: '140px' }}
-          >
-            <option value="all">All Statuses</option>
-            {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-10 rounded-lg border border-black/10 px-3 text-sm"
+        >
+          <option value="all">All Statuses</option>
+          {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <div className="flex flex-wrap items-center gap-2">
           {selectedIds.size > 0 && (
-            <>
-              <select
-                className="search-input"
-                disabled={bulkSaving}
-                onChange={e => { if (e.target.value) bulkUpdateStatus(e.target.value); e.target.value = ''; }}
-                style={{ width: 'auto', minWidth: '180px' }}
-              >
-                <option value="">Bulk update ({selectedIds.size}) →</option>
-                {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </>
+            <select
+              disabled={bulkSaving}
+              onChange={(e) => { if (e.target.value) bulkUpdateStatus(e.target.value); e.target.value = ''; }}
+              className="h-10 rounded-lg border border-black/10 px-3 text-sm"
+            >
+              <option value="">Bulk update ({selectedIds.size}) →</option>
+              {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
           )}
-          <button className="btn-secondary" onClick={handleExportCsv} disabled={filteredOrders.length === 0}>
-            <Download size={16} style={{ marginRight: '0.4rem' }} />
-            Export CSV
-          </button>
+          <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={filteredOrders.length === 0}>
+            <Download size={15} /> Export CSV
+          </Button>
         </div>
       </div>
 
-      <div className="admin-table-container">
-        {loading && orders.length === 0 ? (
-          <div style={{ padding: '4rem', textAlign: 'center' }}>
-            <Loader2 className="animate-spin" size={32} />
-            <p style={{ marginTop: '1rem', color: 'rgba(255,255,255,0.4)' }}>Loading orders...</p>
-          </div>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th style={{ width: '40px' }}>
-                  <input
-                    type="checkbox"
-                    checked={filteredOrders.length > 0 && selectedIds.size === filteredOrders.length}
-                    onChange={toggleSelectAll}
-                    style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                  />
-                </th>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id} style={{ background: selectedIds.has(order.id) ? 'rgba(249,168,38,0.05)' : undefined }}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(order.id)}
-                      onChange={() => toggleSelected(order.id)}
-                      style={{ cursor: 'pointer', width: '16px', height: '16px' }}
-                    />
-                  </td>
-                  <td style={{ fontWeight: 600 }}>#{order.id}</td>
-                  <td>
-                    <div style={{ fontWeight: 500 }}>{order.clients?.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>{order.clients?.phone}</div>
-                  </td>
-                  <td>{new Date(order.created_at).toLocaleDateString()}</td>
-                  <td>₹{order.total_price}</td>
-                  <td>
-                    <div className={`status-badge status-${order.status.toLowerCase()}`} 
-                         style={{ 
-                           display: 'flex', 
-                           alignItems: 'center', 
-                           gap: '0.4rem', 
-                           width: 'fit-content',
-                           background: order.status === 'Packed' ? 'rgba(168, 85, 247, 0.1)' : order.status === 'Cancelled' ? 'rgba(239, 68, 68, 0.1)' : undefined,
-                           color: order.status === 'Packed' ? '#a855f7' : order.status === 'Cancelled' ? '#ef4444' : undefined
-                         }}>
-                      {getStatusIcon(order.status)}
-                      {order.status}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button className="btn-icon" onClick={() => fetchOrderDetails(order.id)} title="View Details">
-                        <Eye size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="admin-modal" style={{ width: '800px', maxHeight: '90vh', overflowY: 'auto' }}>
-            {modalLoading ? (
-              <div style={{ padding: '4rem', textAlign: 'center' }}>
-                <Loader2 className="animate-spin" size={32} />
+      <DataTable
+        data={filteredOrders}
+        rowKey={(o) => o.id}
+        loading={loading && orders.length === 0}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search orders or customers..."
+        emptyTitle="No orders found"
+        columns={[
+          {
+            header: '',
+            className: 'w-10',
+            render: (o) => <input type="checkbox" checked={selectedIds.has(o.id)} onChange={() => toggleSelected(o.id)} className="size-4 accent-brand-500" />,
+          },
+          { header: 'Order ID', render: (o) => <span className="font-semibold">#{o.id}</span> },
+          {
+            header: 'Customer',
+            render: (o) => (
+              <div>
+                <div className="font-medium text-brand-950">{o.clients?.name}</div>
+                <div className="text-xs text-black/40">{o.clients?.phone}</div>
               </div>
-            ) : selectedOrder && (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                  <h2>Order Details #{selectedOrder.id}</h2>
-                  <X size={24} onClick={() => setIsModalOpen(false)} style={{ cursor: 'pointer' }} />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-                  <div className="order-info-section">
-                    <h4 style={{ color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Customer Details</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={16} /> {selectedOrder.clients?.name}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Mail size={16} /> {selectedOrder.clients?.email}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Phone size={16} /> {selectedOrder.clients?.phone}</div>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}><MapPin size={16} style={{ marginTop: '3px' }}/> {selectedOrder.clients?.address || 'No address provided'}</div>
-                    </div>
-                  </div>
-                  <div className="order-info-section">
-                    <h4 style={{ color: 'rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>Management</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Calendar size={16} /> {new Date(selectedOrder.created_at).toLocaleString()}</div>
-                      <div className="status-workflow" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                        {['Pending', 'Packed', 'Shipped', 'Delivered', 'Cancelled'].map(status => (
-                          <button 
-                            key={status}
-                            className={`status-badge`} 
-                            style={{ 
-                              opacity: selectedOrder.status === status ? 1 : 0.4, 
-                              cursor: 'pointer', 
-                              border: selectedOrder.status === status ? '1px solid rgba(255,255,255,0.4)' : 'none',
-                              background: status === 'Cancelled' ? 'rgba(239, 68, 68, 0.1)' : status === 'Packed' ? 'rgba(168, 85, 247, 0.1)' : undefined,
-                              color: status === 'Cancelled' ? '#ef4444' : status === 'Packed' ? '#a855f7' : undefined
-                            }}
-                            onClick={() => updateStatus(selectedOrder.id, status)}
-                          >{status}</button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="order-items-table" style={{ marginBottom: '2rem' }}>
-                  <h4 style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '1rem' }}>Ordered Items</h4>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      <tr>
-                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Product</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Price</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Qty</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'right' }}>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedOrder.order_items?.map((item) => (
-                        <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                          <td style={{ padding: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                              <img src={item.products?.image} alt="" style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover' }} />
-                              <span>{item.products?.name}</span>
-                            </div>
-                          </td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>₹{item.unit_price}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>{item.quantity}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'right' }}>₹{(item.unit_price * item.quantity).toLocaleString()}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <span style={{ color: 'rgba(255,255,255,0.5)' }}>Order Subtotal</span>
-                     <span style={{ fontWeight: 700, fontSize: '1.2rem', color: '#f9a826' }}>₹{selectedOrder.total_price.toLocaleString()}</span>
-                   </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+            ),
+          },
+          { header: 'Date', render: (o) => new Date(o.created_at).toLocaleDateString() },
+          { header: 'Amount', render: (o) => `₹${o.total_price}` },
+          {
+            header: 'Status',
+            render: (o) => (
+              <span className={cn('flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold', statusStyles[o.status])}>
+                {statusIcons[o.status]} {o.status}
+              </span>
+            ),
+          },
+          {
+            header: 'Actions',
+            render: (o) => (
+              <button onClick={() => fetchOrderDetails(o.id)} title="View Details" className="flex size-8 items-center justify-center rounded-lg text-black/50 hover:bg-black/5">
+                <Eye size={15} />
+              </button>
+            ),
+          },
+        ]}
+      />
+      {filteredOrders.length > 0 && (
+        <label className="flex w-fit items-center gap-2 text-xs text-black/50">
+          <input type="checkbox" checked={filteredOrders.length > 0 && selectedIds.size === filteredOrders.length} onChange={toggleSelectAll} className="size-4 accent-brand-500" />
+          Select all visible orders
+        </label>
       )}
+
+      <Sheet open={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedOrder ? `Order Details #${selectedOrder.id}` : 'Order Details'} side="right" className="sm:max-w-lg">
+        {modalLoading ? (
+          <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin text-brand-500" /></div>
+        ) : selectedOrder && (
+          <div className="space-y-6 p-5">
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div>
+                <h4 className="border-b border-black/5 pb-2 text-xs font-bold tracking-wide text-black/40">CUSTOMER DETAILS</h4>
+                <div className="mt-3 space-y-2 text-sm text-black/70">
+                  <div className="flex items-center gap-2"><User size={14} className="text-brand-500" /> {selectedOrder.clients?.name}</div>
+                  <div className="flex items-center gap-2"><Mail size={14} className="text-brand-500" /> {selectedOrder.clients?.email}</div>
+                  <div className="flex items-center gap-2"><Phone size={14} className="text-brand-500" /> {selectedOrder.clients?.phone}</div>
+                  <div className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 text-brand-500" /> {selectedOrder.clients?.address || 'No address provided'}</div>
+                </div>
+              </div>
+              <div>
+                <h4 className="border-b border-black/5 pb-2 text-xs font-bold tracking-wide text-black/40">MANAGEMENT</h4>
+                <div className="mt-3 space-y-3">
+                  <div className="flex items-center gap-2 text-sm text-black/70"><Calendar size={14} className="text-brand-500" /> {new Date(selectedOrder.created_at).toLocaleString()}</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ORDER_STATUSES.map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => updateStatus(selectedOrder.id, status)}
+                        className={cn(
+                          'rounded-full px-2.5 py-1 text-xs font-semibold',
+                          statusStyles[status],
+                          selectedOrder.status === status ? 'ring-2 ring-brand-500' : 'opacity-50'
+                        )}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="mb-3 text-xs font-bold tracking-wide text-black/40">ORDERED ITEMS</h4>
+              <div className="divide-y divide-black/5 rounded-xl border border-black/5">
+                {selectedOrder.order_items?.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between px-3 py-2.5 text-sm">
+                    <div className="flex items-center gap-2.5">
+                      <img src={item.products?.image} alt="" className="size-8 rounded object-cover" />
+                      <span className="text-brand-950">{item.products?.name}</span>
+                    </div>
+                    <span className="text-black/50">{item.quantity} × ₹{item.unit_price}</span>
+                    <span className="font-semibold text-brand-950">₹{(item.unit_price * item.quantity).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl bg-brand-50/50 p-4">
+              <span className="text-sm text-black/55">Order Subtotal</span>
+              <span className="text-lg font-bold text-brand-600">₹{selectedOrder.total_price.toLocaleString()}</span>
+            </div>
+          </div>
+        )}
+      </Sheet>
     </div>
   );
 };

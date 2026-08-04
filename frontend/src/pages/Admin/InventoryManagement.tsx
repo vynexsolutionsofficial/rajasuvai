@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, AlertTriangle, CheckCircle2, History, Save } from 'lucide-react';
-import './ProductManagement.css';
+import { Loader2, AlertTriangle, CheckCircle2, History, Save } from 'lucide-react';
 import { api } from '../../services/api';
+import { DataTable } from '../../components/ui/DataTable';
+import { Button } from '../../components/ui/Button';
+import { cn } from '../../lib/cn';
 
 interface InventoryItem {
   id: number;
@@ -20,8 +22,6 @@ const InventoryManagement: React.FC = () => {
   const [editQty, setEditQty] = useState('');
   const [savingId, setSavingId] = useState<number | null>(null);
 
-  useEffect(() => { fetchInventory(); }, []);
-
   const fetchInventory = async () => {
     setLoading(true);
     try {
@@ -34,6 +34,10 @@ const InventoryManagement: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    fetchInventory();
+  }, []);
+
   const startEdit = (item: InventoryItem) => {
     setEditingId(item.id);
     setEditQty(String(item.quantity));
@@ -44,11 +48,8 @@ const InventoryManagement: React.FC = () => {
     if (isNaN(qty) || qty < 0) return;
     setSavingId(item.id);
     try {
-      await api.put(`/api/admin/inventory/${item.id}`, {
-        quantity: qty,
-        low_stock_threshold: item.low_stock_threshold
-      });
-      setInventory(prev => prev.map(i => i.id === item.id ? { ...i, quantity: qty, updated_at: new Date().toISOString() } : i));
+      await api.put(`/api/admin/inventory/${item.id}`, { quantity: qty, low_stock_threshold: item.low_stock_threshold });
+      setInventory((prev) => prev.map((i) => (i.id === item.id ? { ...i, quantity: qty, updated_at: new Date().toISOString() } : i)));
       setEditingId(null);
     } catch (err) {
       console.error(err);
@@ -57,120 +58,72 @@ const InventoryManagement: React.FC = () => {
     }
   };
 
-  const filtered = inventory.filter(i =>
-    i.products?.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = inventory.filter((i) => i.products?.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
-    <div className="inventory-mgmt">
-      <div className="admin-toolbar">
-        <div style={{ position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'rgba(255,255,255,0.4)' }} />
-          <input
-            type="text"
-            placeholder="Search stock..."
-            className="search-input"
-            style={{ paddingLeft: '2.5rem', width: '300px' }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <button className="btn-icon" onClick={fetchInventory}><History size={18} /> Refresh</button>
-      </div>
-
-      <div className="admin-table-container">
-        {loading ? (
-          <div style={{ padding: '4rem', textAlign: 'center' }}>
-            <Loader2 className="animate-spin" size={32} />
-          </div>
-        ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Current Stock</th>
-                <th>Threshold</th>
-                <th>Status</th>
-                <th>Last Updated</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(item => (
-                <tr key={item.id}>
-                  <td style={{ fontWeight: 600 }}>{item.products?.name}</td>
-                  <td>{item.products?.category}</td>
-                  <td>
-                    {editingId === item.id ? (
-                      <input
-                        type="number"
-                        min="0"
-                        value={editQty}
-                        onChange={e => setEditQty(e.target.value)}
-                        style={{
-                          width: '80px', padding: '4px 8px', borderRadius: '6px',
-                          border: '1px solid #f9a826', background: 'rgba(249,168,38,0.1)',
-                          color: '#fff', fontSize: '1rem', fontWeight: 700
-                        }}
-                        autoFocus
-                        onKeyDown={e => { if (e.key === 'Enter') saveStock(item); if (e.key === 'Escape') setEditingId(null); }}
-                      />
-                    ) : (
-                      <span style={{ fontWeight: 700, fontSize: '1.1rem', color: item.quantity <= item.low_stock_threshold ? '#ef4444' : '#4ade80' }}>
-                        {item.quantity}
-                      </span>
-                    )}
-                  </td>
-                  <td>{item.low_stock_threshold}</td>
-                  <td>
-                    {item.quantity <= item.low_stock_threshold ? (
-                      <div className="status-badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <AlertTriangle size={14} /> Low Stock
-                      </div>
-                    ) : (
-                      <div className="status-badge" style={{ background: 'rgba(74,222,128,0.1)', color: '#4ade80', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <CheckCircle2 size={14} /> Healthy
-                      </div>
-                    )}
-                  </td>
-                  <td>{new Date(item.updated_at).toLocaleString()}</td>
-                  <td>
-                    {editingId === item.id ? (
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button
-                          className="btn-icon"
-                          style={{ background: 'rgba(74,222,128,0.1)', color: '#4ade80', padding: '6px 12px', fontSize: '0.8rem' }}
-                          onClick={() => saveStock(item)}
-                          disabled={savingId === item.id}
-                        >
-                          {savingId === item.id ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                          Save
-                        </button>
-                        <button
-                          className="btn-icon"
-                          style={{ padding: '6px 12px', fontSize: '0.8rem', opacity: 0.6 }}
-                          onClick={() => setEditingId(null)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className="btn-icon"
-                        style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-                        onClick={() => startEdit(item)}
-                      >
-                        Edit Stock
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+    <div className="space-y-5">
+      <DataTable
+        data={filtered}
+        rowKey={(i) => i.id}
+        loading={loading}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search stock..."
+        emptyTitle="No inventory items found"
+        actions={<Button variant="outline" size="sm" onClick={fetchInventory}><History size={15} /> Refresh</Button>}
+        columns={[
+          { header: 'Product', render: (i) => <span className="font-semibold text-brand-950">{i.products?.name}</span> },
+          { header: 'Category', render: (i) => i.products?.category },
+          {
+            header: 'Current Stock',
+            render: (item) =>
+              editingId === item.id ? (
+                <input
+                  type="number"
+                  min={0}
+                  value={editQty}
+                  onChange={(e) => setEditQty(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveStock(item); if (e.key === 'Escape') setEditingId(null); }}
+                  className="w-20 rounded-lg border border-brand-400 bg-brand-50 px-2 py-1 text-base font-bold text-brand-950"
+                />
+              ) : (
+                <span className={cn('text-base font-bold', item.quantity <= item.low_stock_threshold ? 'text-error-600' : 'text-fresh-600')}>
+                  {item.quantity}
+                </span>
+              ),
+          },
+          { header: 'Threshold', render: (i) => i.low_stock_threshold },
+          {
+            header: 'Status',
+            render: (i) =>
+              i.quantity <= i.low_stock_threshold ? (
+                <span className="flex w-fit items-center gap-1.5 rounded-full bg-error-50 px-2.5 py-1 text-xs font-semibold text-error-600">
+                  <AlertTriangle size={13} /> Low Stock
+                </span>
+              ) : (
+                <span className="flex w-fit items-center gap-1.5 rounded-full bg-fresh-100 px-2.5 py-1 text-xs font-semibold text-fresh-700">
+                  <CheckCircle2 size={13} /> Healthy
+                </span>
+              ),
+          },
+          { header: 'Last Updated', render: (i) => new Date(i.updated_at).toLocaleString() },
+          {
+            header: 'Actions',
+            render: (item) =>
+              editingId === item.id ? (
+                <div className="flex gap-2">
+                  <button onClick={() => saveStock(item)} disabled={savingId === item.id} className="flex items-center gap-1 rounded-lg bg-fresh-100 px-2.5 py-1.5 text-xs font-semibold text-fresh-700">
+                    {savingId === item.id ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />} Save
+                  </button>
+                  <button onClick={() => setEditingId(null)} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-black/50 hover:bg-black/5">Cancel</button>
+                </div>
+              ) : (
+                <button onClick={() => startEdit(item)} className="rounded-lg border border-black/10 px-2.5 py-1.5 text-xs font-semibold text-black/60 hover:bg-black/5">Edit Stock</button>
+              ),
+          },
+        ]}
+      />
     </div>
   );
 };
