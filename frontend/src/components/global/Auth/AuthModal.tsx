@@ -83,7 +83,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
       showMsg('success', 'Login successful!');
       setTimeout(onClose, 1200);
     } catch (err: any) {
-      showMsg('error', err.message || 'Invalid credentials');
+      // Supabase returns this when "Confirm email" is enabled and the user
+      // hasn't clicked the link in the confirmation email yet.
+      const notConfirmed = /email not confirmed/i.test(err?.message || '');
+      showMsg(
+        'error',
+        notConfirmed
+          ? 'Please confirm your email first — check your inbox for the confirmation link, then log in.'
+          : err.message || 'Invalid credentials'
+      );
     } finally {
       setLoading(false);
     }
@@ -95,9 +103,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
     setLoading(true);
     setMessage(null);
     try {
-      await api.post('/api/auth/register', formData);
-      showMsg('success', 'Account created! You can now log in.');
-      setTimeout(() => setStep('email-login'), 1500);
+      const data = await api.post('/api/auth/register', formData);
+      if (data.requiresConfirmation) {
+        showMsg('success', 'Account created! Check your email for a confirmation link, then log in.');
+        setTimeout(() => setStep('email-login'), 3000);
+      } else {
+        showMsg('success', 'Account created! You can now log in.');
+        setTimeout(() => setStep('email-login'), 1500);
+      }
     } catch (err: any) {
       showMsg('error', err.message || 'Registration failed');
     } finally {

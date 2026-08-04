@@ -3,6 +3,15 @@ const API_BASE_URL = '';
 
 let tokenCache: { token: string | null; expiry: number } = { token: null, expiry: 0 };
 
+/**
+ * Drops the cached access token. Must be called whenever the session changes —
+ * without this, a signed-out user keeps sending their previous JWT for up to
+ * the cache TTL, and since JWTs are stateless the backend would still accept it.
+ */
+export const clearTokenCache = () => {
+  tokenCache = { token: null, expiry: 0 };
+};
+
 const getAuthToken = async () => {
   const now = Date.now();
   if (tokenCache.token && now < tokenCache.expiry) {

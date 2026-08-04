@@ -39,7 +39,9 @@ export const createOrder = async (req, res) => {
       if (!product) continue;
       const price = parseFloat(product.price.toString().replace(/[^\d.]/g, ''));
       subtotal += price * item.quantity;
-      orderItems.push({ product_id: product.id, quantity: item.quantity, price_at_purchase: price });
+      // Column is `unit_price` — every read path (Profile, admin orders,
+      // OrderManagement) selects unit_price, and the schema declares it NOT NULL.
+      orderItems.push({ product_id: product.id, quantity: item.quantity, unit_price: price });
     }
 
     // 2. Calculations
@@ -63,8 +65,13 @@ export const createOrder = async (req, res) => {
 
     if (dbOrderErr) throw dbOrderErr;
 
-    // 4. Order Items
-    await supabase.from('order_items').insert(orderItems.map(i => ({ ...i, order_id: dbOrder.id })));
+    // 4. Order Items — must be checked; a silent failure here produces an
+    // order with no line items, which is worse than failing the checkout.
+    const { error: itemsErr } = await supabase
+      .from('order_items')
+      .insert(orderItems.map(i => ({ ...i, order_id: dbOrder.id })));
+
+    if (itemsErr) throw itemsErr;
 
     // 5. Razorpay Order
     const razorOrder = await razorpay.orders.create({
@@ -158,16 +165,28 @@ async function fulfillOrder(dbOrderId, paymentId, razorOrderId, method) {
 
   // Inventory logic...
   const { data: items } = await supabase.from('order_items').select('product_id, quantity').eq('order_id', dbOrderId);
-  for (const item of items) {
+  for (const item of items || []) {
     const { data: inv } = await supabase.from('inventory').select('quantity').eq('product_id', item.product_id).single();
     if (inv) {
         await supabase.from('inventory').update({ quantity: inv.quantity - item.quantity }).eq('product_id', item.product_id);
     }
   }
 
-  // Clear cart
-  const { data: order } = await supabase.from('orders').select('client_id').eq('id', dbOrderId).single();
+  const { data: order } = await supabase
+    .from('orders')
+    .select('client_id, total_price')
+    .eq('id', dbOrderId)
+    .single();
+
   if (order) {
+    // Record the sale — GET /api/admin/dashboard-stats sums sales.total_amount
+    // for its revenue figure, so without this the dashboard always reads zero.
+    await supabase.from('sales').insert([{
+      order_id: dbOrderId,
+      total_amount: order.total_price
+    }]);
+
+    // Clear cart
     await supabase.from('cart_items').delete().eq('client_id', order.client_id);
   }
 }

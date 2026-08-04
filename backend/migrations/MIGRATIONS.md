@@ -22,6 +22,8 @@ contents are unchanged.
 | `110_product_details.sql` | `size_g` and other product detail columns |
 | `120_support_tickets_public_insert.sql` | RLS INSERT policy so guests can submit the public Contact Us form |
 | `130_newsletter_subscribers.sql` | Creates the missing `newsletter_subscribers` table + RLS INSERT policy |
+| `140_checkout_schema_reconciliation.sql` | Creates `cart_items` + `sales`, adds missing `orders`/`payments` columns, relaxes the order status constraint |
+| **`APPLY_NOW.sql`** | **120 + 130 + 140 combined — paste this into the Supabase SQL Editor** |
 | `seed_dummy_data.sql` | Sample/seed data — not a schema migration, run only for local dev seeding |
 
 ## Known gaps and caveats
@@ -44,12 +46,26 @@ contents are unchanged.
   written with `IF NOT EXISTS` guards, so they're safe to re-run against a
   schema that already has some of them applied — compare column-by-column via
   the Supabase SQL Editor if in doubt.
-- **`120` and `130` are confirmed NOT applied and are needed now.** The
-  Supabase project came back online partway through the redesign work (it had
-  been unreachable — see project notes) and live-testing surfaced two real
-  gaps: (1) `POST /api/support` (the public Contact Us form) fails with a row
-  level security violation because `support_tickets` has no INSERT policy,
-  and (2) `POST /api/newsletter` (Footer subscribe form) fails because
-  `newsletter_subscribers` doesn't exist in the live schema at all. Run
-  `120_support_tickets_public_insert.sql` and `130_newsletter_subscribers.sql`
-  in the Supabase SQL Editor to fix both.
+- **Migrations `040`–`110` were authored but never applied to this project.**
+  Determined empirically on 2026-08-04 by probing the live schema: `payments`
+  is missing `payment_id`/`razorpay_order_id`/`method` (all defined in `040`),
+  and the `cart_items`/`sales` tables were never created by any migration at
+  all despite the code depending on them.
+
+- **`120`, `130` and `140` are confirmed NOT applied and are required now.**
+  Run **`APPLY_NOW.sql`** (all three combined) in the Supabase SQL Editor.
+  Until then these user-facing flows are broken in production:
+  - **Checkout fails entirely** — `createOrder` writes `orders.address_id` and
+    `orders.metadata`, neither of which exists, and the status values it uses
+    (`pending_payment`, `paid`) violate the `orders_status_check` constraint.
+  - **The logged-in cart is dead** — `cart_items` does not exist, so every
+    `/api/cart` route and the post-payment cart clear fail.
+  - **Admin dashboard revenue always reads ₹0** — it sums `sales.total_amount`
+    and the `sales` table does not exist.
+  - Contact Us form (RLS) and newsletter signup (missing table) both 500.
+
+- **Separately fixed in code (not schema):** `paymentController.createOrder`
+  was inserting `order_items.price_at_purchase`, a column that does not exist
+  and never did — the schema and every read path use `unit_price`. That insert
+  was also unchecked, so it failed silently and produced orders with no line
+  items rather than surfacing an error.

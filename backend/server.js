@@ -185,7 +185,18 @@ app.post('/api/auth/register', async (req, res) => {
 
     if (clientError) throw clientError;
 
-    res.status(201).json({ message: 'User registered successfully', user: authData.user });
+    // When Supabase has "Confirm email" enabled, signUp returns no session —
+    // the user cannot log in until they click the link in the confirmation
+    // email. Surface that so the client doesn't tell them to log in and fail.
+    const requiresConfirmation = !authData.session;
+
+    res.status(201).json({
+      message: requiresConfirmation
+        ? 'Account created. Please check your email and confirm your address before logging in.'
+        : 'User registered successfully',
+      requiresConfirmation,
+      user: authData.user
+    });
   } catch (error) {
     console.error('Registration Error:', error.message);
     res.status(400).json({ error: error.message });

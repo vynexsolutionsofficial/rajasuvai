@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
+import { clearTokenCache } from '../services/api';
 
 type Role = 'admin' | 'customer';
 
@@ -44,6 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
+      // The API layer caches the access token, so it must be invalidated on
+      // every session change (sign-in, sign-out, refresh) or stale tokens leak
+      // across sessions.
+      clearTokenCache();
       setUser(session?.user ?? null);
       await loadRole(session?.user ?? null);
     });
